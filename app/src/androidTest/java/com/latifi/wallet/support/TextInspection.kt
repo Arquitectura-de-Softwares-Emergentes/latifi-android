@@ -28,7 +28,12 @@ fun SemanticsNodeInteractionsProvider.assertNoTruncatedText() {
             val results = mutableListOf<TextLayoutResult>()
             action.invoke(results)
             results.forEach {
-                assertFalse("text is truncated: ${it.layoutInput.text.text}", it.hasVisualOverflow)
+                assertFalse(
+                    "text is truncated: \"${it.layoutInput.text.text}\" width=${it.didOverflowWidth} " +
+                        "height=${it.didOverflowHeight} size=${it.size} lines=${it.lineCount} " +
+                        "constraints=${it.layoutInput.constraints}",
+                    it.hasVisualOverflow,
+                )
             }
         }
         node.children.forEach(::walk)
