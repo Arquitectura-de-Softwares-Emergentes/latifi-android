@@ -45,6 +45,12 @@ class FakeWalletGateway(
     /** The transaction hash a sent transaction gets, by request id. A test makes each one unique. */
     var txHashOf: (requestId: Long) -> String = { FAKE_TX_HASH },
 ) : WalletGateway {
+    /**
+     * Called when the person approves a transaction, with the hash it got and the request. The demo
+     * wires the chain simulator here, so the fake chain changes only for an approved transaction.
+     */
+    var onSend: (hash: String, request: WalletRequest.SendTransaction) -> Unit = { _, _ -> }
+
     private val mutableState = MutableStateFlow(initialState)
     private val mutableResponses = MutableSharedFlow<WalletResponse>(extraBufferCapacity = 64)
     private var nextRequestId = 1L
@@ -108,7 +114,11 @@ class FakeWalletGateway(
 
     private fun approved(id: Long, request: WalletRequest): WalletOutcome = when (request) {
         is WalletRequest.PersonalSign -> WalletOutcome.Signature(FAKE_SIGNATURE)
-        is WalletRequest.SendTransaction -> WalletOutcome.TransactionHash(txHashOf(id))
+        is WalletRequest.SendTransaction -> {
+            val hash = txHashOf(id)
+            onSend(hash, request)
+            WalletOutcome.TransactionHash(hash)
+        }
     }
 
     companion object {
