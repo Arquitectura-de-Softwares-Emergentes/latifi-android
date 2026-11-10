@@ -13,6 +13,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -116,6 +119,9 @@ class ProfileScreenTest {
         }
     }
 
+    /** A node of the dialog window. The dialog confirm and the Disconnect row share the same text. */
+    private fun dialogText(res: Int) = rule.onNode(hasText(text(res)) and hasAnyAncestor(isDialog()))
+
     private fun text(res: Int, vararg args: Any) = context.getString(res, *args)
 
     @Test
@@ -174,7 +180,7 @@ class ProfileScreenTest {
 
         rule.onNodeWithText(text(R.string.disconnect_title)).assertIsDisplayed()
         rule.onNodeWithText(text(R.string.disconnect_body)).assertIsDisplayed()
-        rule.onNodeWithText(text(R.string.disconnect_confirm)).assertIsDisplayed()
+        dialogText(R.string.disconnect_confirm).assertIsDisplayed()
         rule.waitForIdle()
         rule.onNodeWithText(text(R.string.disconnect_keep)).assertIsDisplayed().assertIsFocused()
     }
@@ -193,7 +199,7 @@ class ProfileScreenTest {
     fun theConfirmChoiceSendsTheDisconnectEvent() {
         show()
         rule.onNodeWithText(text(R.string.disconnect_action)).performScrollTo().performClick()
-        rule.onNodeWithText(text(R.string.disconnect_confirm)).performClick()
+        dialogText(R.string.disconnect_confirm).performClick()
         assertTrue(events.contains(ProfileEvent.ConfirmDisconnect))
     }
 
