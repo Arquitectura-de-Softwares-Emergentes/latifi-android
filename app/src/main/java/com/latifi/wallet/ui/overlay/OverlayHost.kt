@@ -10,6 +10,7 @@ import com.latifi.wallet.ui.connect.WalletHelpSheet
 import com.latifi.wallet.ui.nav.Overlays
 import com.latifi.wallet.ui.signin.SignInSheetHost
 import com.latifi.wallet.ui.signin.SignInViewModel
+import com.latifi.wallet.ui.tx.TxStatusOverlay
 
 /**
  * Draws the open overlay above the NavHost. Each overlay gets one branch in the `when`
@@ -22,6 +23,7 @@ fun OverlayHost(controller: OverlayController, reauth: ReauthCoordinator) {
     when (current) {
         Overlays.SIGN_IN -> SignInOverlay(reauth)
         Overlays.WALLET_HELP -> WalletHelpSheet(onClose = { controller.dismiss(Overlays.WALLET_HELP) })
+        Overlays.TX_STATUS -> TxStatusOverlay()
         else -> Unit
     }
 }
