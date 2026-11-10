@@ -282,12 +282,13 @@ class ReputationScreenTest {
     @Test
     fun aFailedHistoryKeepsTheScoreAndReloadsOnlyTheHistory() {
         show(ready(history = HistoryContent.Error(ErrorKind.Server), counter = null))
+        // The list is lazy, so the score block must be checked before the scroll moves it away.
+        rule.onNodeWithText(text(R.string.rep_score, 620)).assertExists()
         scrollTo(hasText(text(R.string.retry_reload)))
 
         rule.onNodeWithText(text(R.string.retry_reload)).performClick()
 
         assertEquals(listOf<ReputationEvents>(ReputationEvents.ReloadHistory), sent)
-        rule.onNodeWithText(text(R.string.rep_score, 620)).assertExists()
     }
 
     @Test
