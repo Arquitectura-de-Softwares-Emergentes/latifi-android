@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.latifi.wallet.core.AppConfig
 import com.latifi.wallet.core.AppMode
 import com.latifi.wallet.data.fake.FakeAuthRepository
+import com.latifi.wallet.data.fake.FakeProfileRepository
 import com.latifi.wallet.data.fake.FakeWalletGateway
 import com.latifi.wallet.data.prefs.DataStorePrefsStore
 import com.latifi.wallet.data.prefs.PREFS_FILE_NAME
@@ -15,6 +16,7 @@ import com.latifi.wallet.domain.auth.AuthRepository
 import com.latifi.wallet.domain.auth.DefaultReauthCoordinator
 import com.latifi.wallet.domain.auth.ReauthCoordinator
 import com.latifi.wallet.domain.prefs.PrefsStore
+import com.latifi.wallet.domain.profile.ProfileRepository
 import com.latifi.wallet.domain.session.SessionStore
 import com.latifi.wallet.domain.wallet.WalletGateway
 import com.latifi.wallet.ui.overlay.OverlayController
@@ -51,6 +53,13 @@ object DataModule {
     fun provideAuthRepository(config: AppConfig, clock: Clock): AuthRepository = when (config.mode) {
         AppMode.Demo -> FakeAuthRepository(clock)
         AppMode.Live -> error("The live auth repository is added by plan 05-13. Build without a project id to use demo mode.")
+    }
+
+    @Provides
+    @Singleton
+    fun provideProfileRepository(config: AppConfig, clock: Clock): ProfileRepository = when (config.mode) {
+        AppMode.Demo -> FakeProfileRepository(clock)
+        AppMode.Live -> error("The live profile repository is added by plan 05-13. Build without a project id to use demo mode.")
     }
 
     @Provides
