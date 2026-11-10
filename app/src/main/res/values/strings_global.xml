@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_next">Next</string>
+    <string name="action_back">Back</string>
+    <string name="retry_reload">Reload this screen</string>
+    <string name="label_required">Required</string>
+    <string name="step_of">Step %1$d of %2$d</string>
+    <string name="test_money_notice">This is a demo. tUSD are test dollars with no real value.</string>
+    <string name="loading_generic">Loading</string>
+    <string name="menu_open">Menu</string>
+    <string name="refresh">Refresh</string>
+    <string name="load_more">Load more</string>
+    <string name="refresh_failed">Could not refresh. Showing what we had.</string>
+    <string name="err_offline_title">No internet connection</string>
+    <string name="err_offline_body">Check your connection and try again.</string>
+    <string name="err_server_title">Something went wrong on our side</string>
+    <string name="err_server_body">Try again in a moment. Nothing changed in your wallet.</string>
+    <string name="err_rate_limit">Too many requests. Wait a moment and try again.</string>
+    <string name="err_not_found">We could not find this item. It may no longer be available.</string>
+</resources>

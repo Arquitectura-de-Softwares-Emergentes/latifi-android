@@ -1,0 +1,66 @@
+package com.latifi.wallet.ui.nav
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.latifi.wallet.domain.model.AppRole
+import com.latifi.wallet.ui.components.ScreenScaffold
+
+/**
+ * Registers the tab container at [Routes.MAIN]. The container owns a nested NavHost whose
+ * destinations are the six tabs, so each tab keeps its own back stack and scroll state while
+ * the adaptive scaffold around it shows the four tabs of [role].
+ */
+fun NavGraphBuilder.mainTabsGraph(role: AppRole) {
+    composable(Routes.MAIN) { MainTabs(role) }
+}
+
+@Composable
+internal fun MainTabs(role: AppRole) {
+    val tabController = rememberNavController()
+    val entry by tabController.currentBackStackEntryAsState()
+    val selected = TabDestination.fromRoute(entry?.destination?.route) ?: TabDestination.Home
+
+    AdaptiveNavScaffold(
+        role = role,
+        selected = selected,
+        onSelect = { tab -> tabController.selectTab(tab) },
+    ) {
+        NavHost(navController = tabController, startDestination = Routes.HOME) {
+            // Each feature plan replaces the placeholder of its tab with the real screen.
+            composable(Routes.HOME) { TabPlaceholder(TabDestination.Home) }
+            composable(Routes.LOANS) { TabPlaceholder(TabDestination.Loans) }
+            composable(Routes.REPUTATION) { TabPlaceholder(TabDestination.Reputation) }
+            composable(Routes.INVEST) { TabPlaceholder(TabDestination.Invest) }
+            composable(Routes.PORTFOLIO) { TabPlaceholder(TabDestination.Portfolio) }
+            composable(Routes.PROFILE) { TabPlaceholder(TabDestination.Profile) }
+        }
+    }
+}
+
+private fun NavHostController.selectTab(tab: TabDestination) {
+    navigate(tab.route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
+/** A tab body that shows its title and nothing else, until its feature plan builds it. */
+@Composable
+private fun TabPlaceholder(tab: TabDestination) {
+    ScreenScaffold(title = stringResource(tab.label)) { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding))
+    }
+}
