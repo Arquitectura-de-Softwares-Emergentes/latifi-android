@@ -13,14 +13,13 @@ import com.latifi.wallet.ui.nav.Routes
  * the person comes back from a detail.
  */
 @Composable
-fun LoansRoute(rootController: NavHostController) {
+fun LoansRoute(rootController: NavHostController, onRequestLoan: () -> Unit = {}) {
     val viewModel: LoansViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     LoansScreen(
         state = state,
         onEvent = viewModel::onEvent,
         onOpenLoan = { id -> rootController.navigate(Routes.loanDetail(id)) },
-        // The Request a loan screen is registered by plan 05-12, which wires this button.
-        onRequestLoan = {},
+        onRequestLoan = onRequestLoan,
     )
 }

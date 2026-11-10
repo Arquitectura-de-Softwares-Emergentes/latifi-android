@@ -44,7 +44,7 @@ class RoutesRegistryTest {
             setOf(
                 "ONBOARDING", "HOW_IT_WORKS", "CONNECT", "ROLE", "PROFILE_FORM",
                 "MAIN", "HOME", "LOANS", "REPUTATION", "INVEST", "PORTFOLIO", "PROFILE", "LOAN_DETAIL",
-                "REQUEST_DETAIL", "INVESTMENT_DETAIL",
+                "REQUEST_DETAIL", "INVESTMENT_DETAIL", "REQUEST_LOAN",
             ),
             scan.registeredRoutes,
         )
@@ -141,7 +141,7 @@ class RoutesRegistryTest {
     companion object {
         /** Routes whose screen is not built yet. Remove a name in the plan that registers it. */
         val PENDING_ROUTES = setOf(
-            "REQUEST_LOAN", "PAY", "FUND",
+            "PAY", "FUND",
         )
 
         /** Overlays whose sheet is not built yet. Remove a name in the plan that registers it. */
