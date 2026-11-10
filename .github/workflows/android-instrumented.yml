@@ -1,26 +1,32 @@
-name: android-spike
+name: android-instrumented
 
-# Evidence run for ROADMAP Decision 1 (Keystore spike). Not a required check and it
-# must never be added to branch protection: an emulator can be flaky.
+# Advisory workflow. It runs the instrumented tests on an emulator and must never be added
+# to branch protection, because an emulator can be flaky. The required checks are `ci` and
+# `commit-lint` only. A later plan adds an API 30 leg for the per-app language test.
 # workflow_dispatch only works once this file exists on the default branch.
 on:
   pull_request:
     branches: [main, develop]
     paths:
-      - app/src/androidTest/java/com/latifi/wallet/spike/KeystoreEnvelopeSpikeTest.kt
-      - .github/workflows/android-spike.yml
+      - app/src/**
+      - gradle/**
+      - build.gradle.kts
+      - app/build.gradle.kts
+      - .github/workflows/android-instrumented.yml
+  push:
+    branches: [develop]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: android-spike-${{ github.ref }}
+  group: android-instrumented-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  android-spike:
-    name: android-spike
+  android-instrumented:
+    name: android-instrumented
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -41,22 +47,22 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Run the Keystore spike on an emulator
+      - name: Run the instrumented tests on an API 34 emulator
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
           api-level: 34
           arch: x86_64
           target: google_apis
           disable-animations: true
-          script: ./gradlew --no-daemon connectedDebugAndroidTest && adb logcat -d -s KeystoreSpike:I | tee spike-logcat.txt
+          script: ./gradlew --no-daemon connectedDebugAndroidTest
 
-      - name: Upload instrumentation reports
+      - name: Upload instrumentation reports and screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: android-spike-reports
+          name: android-instrumented-reports
           path: |
             app/build/reports/androidTests/
             app/build/outputs/androidTest-results/
-            spike-logcat.txt
+            app/build/outputs/connected_android_test_additional_output/
           if-no-files-found: ignore

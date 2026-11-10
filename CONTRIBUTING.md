@@ -70,13 +70,15 @@ Releases use SemVer. Right after a release or hotfix merges into `main`, create 
 
 ## Running the checks locally
 
-Run the same checks as the `ci` job before you push. You need JDK 21 and the Android SDK (set `ANDROID_HOME` or create a git-ignored `local.properties` with `sdk.dir`):
+Run the same checks as the `ci` job before you push. You need JDK 21 and the Android SDK. Set the SDK variables, or create a git-ignored `local.properties` with `sdk.dir`:
 
 ```
-./gradlew lintDebug testDebugUnitTest assembleDebug
+export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
+export ANDROID_SDK_ROOT=$ANDROID_HOME
+./gradlew lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest
 ```
 
-The build runs Android Lint (it fails on errors), the JVM unit tests and assembles the debug APK.
+The build runs Android Lint (it fails on errors), the JVM unit tests, assembles the debug APK and compiles the instrumented tests with `assembleDebugAndroidTest`. The instrumented tests need an emulator, so they run in the advisory `android-instrumented` workflow on the pull request.
 
 To try the commit rules without GitHub, run `bash .github/scripts/commit-lint.test.sh`.
 
