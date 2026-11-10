@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -43,7 +44,6 @@ fun ConfirmDialog(
     onDismiss: () -> Unit = onSafe,
 ) {
     val safeFocus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { safeFocus.requestFocus() }
     DisposableEffect(triggerFocus) {
         onDispose { runCatching { triggerFocus?.requestFocus() } }
     }
@@ -55,6 +55,10 @@ fun ConfirmDialog(
         title = { Text(text = title, style = MaterialTheme.typography.titleMedium) },
         text = { Text(text = body, style = MaterialTheme.typography.bodyLarge) },
         dismissButton = {
+            // The effect lives here, inside the dialog window, on purpose. The dialog composes
+            // its content in its own window a moment after the caller, so a request made from
+            // the caller would run before this button exists and be lost.
+            FocusSafeActionOnShow(safeFocus)
             TextButton(
                 onClick = onSafe,
                 modifier = Modifier
@@ -79,3 +83,20 @@ fun ConfirmDialog(
         },
     )
 }
+
+/**
+ * Asks for focus on the safe action as soon as the dialog window shows it. The dialog window
+ * takes view focus a frame or two after it opens, so one request can be refused. It tries again
+ * on the next frames, at most [MaxAttempts] times, and stops as soon as the focus is held.
+ */
+@Composable
+private fun FocusSafeActionOnShow(safeFocus: FocusRequester) {
+    LaunchedEffect(safeFocus) {
+        repeat(MaxAttempts) {
+            if (runCatching { safeFocus.requestFocus() }.getOrDefault(false)) return@LaunchedEffect
+            withFrameNanos { }
+        }
+    }
+}
+
+private const val MaxAttempts = 5
