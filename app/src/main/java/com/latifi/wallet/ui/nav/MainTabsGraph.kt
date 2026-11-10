@@ -45,7 +45,7 @@ internal fun MainTabs(role: AppRole, rootController: NavHostController) {
         NavHost(navController = tabController, startDestination = Routes.HOME) {
             // Each feature plan replaces the placeholder of its tab with the real screen.
             composable(Routes.HOME) { TabPlaceholder(TabDestination.Home) }
-            composable(Routes.LOANS) { LoansRoute() }
+            composable(Routes.LOANS) { LoansRoute(rootController) }
             composable(Routes.REPUTATION) { TabPlaceholder(TabDestination.Reputation) }
             composable(Routes.INVEST) { TabPlaceholder(TabDestination.Invest) }
             composable(Routes.PORTFOLIO) { TabPlaceholder(TabDestination.Portfolio) }
