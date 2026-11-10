@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feed_title">Invest</string>
+    <plurals name="counter_requests">
+        <item quantity="one">%d request</item>
+        <item quantity="other">%d requests</item>
+    </plurals>
+    <string name="loading_requests">Loading requests</string>
+    <string name="requested_by">Requested by %1$s</string>
+    <string name="name_not_shared">Name not shared yet</string>
+    <string name="fund_card_cta">Fund</string>
+    <string name="fund_card_a11y">Fund request of %1$s</string>
+    <string name="open_details_a11y">Double tap to open details</string>
+</resources>

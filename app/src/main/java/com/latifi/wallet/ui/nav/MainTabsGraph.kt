@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.latifi.wallet.domain.model.AppRole
 import com.latifi.wallet.ui.components.ScreenScaffold
+import com.latifi.wallet.ui.feed.FeedRoute
 import com.latifi.wallet.ui.home.HomeRoute
 import com.latifi.wallet.ui.loans.LoansRoute
 import com.latifi.wallet.ui.profile.ProfileRoute
@@ -49,7 +50,7 @@ internal fun MainTabs(role: AppRole, rootController: NavHostController) {
             composable(Routes.HOME) { HomeRoute(onBrowse = { tabController.selectTab(TabDestination.Invest) }) }
             composable(Routes.LOANS) { LoansRoute(rootController) }
             composable(Routes.REPUTATION) { ReputationRoute(rootController) }
-            composable(Routes.INVEST) { TabPlaceholder(TabDestination.Invest) }
+            composable(Routes.INVEST) { FeedRoute() }
             composable(Routes.PORTFOLIO) { TabPlaceholder(TabDestination.Portfolio) }
             composable(Routes.PROFILE) { ProfileRoute(rootController) }
         }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feed_title">Invertir</string>
+    <plurals name="counter_requests">
+        <item quantity="one">%d solicitud</item>
+        <item quantity="other">%d solicitudes</item>
+    </plurals>
+    <string name="loading_requests">Cargando solicitudes</string>
+    <string name="requested_by">Solicitado por %1$s</string>
+    <string name="name_not_shared">Nombre aún no compartido</string>
+    <string name="fund_card_cta">Fondear</string>
+    <string name="fund_card_a11y">Fondear solicitud de %1$s</string>
+    <string name="open_details_a11y">Toca dos veces para abrir el detalle</string>
+</resources>
