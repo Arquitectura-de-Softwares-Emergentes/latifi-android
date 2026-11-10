@@ -79,8 +79,19 @@ fun <T> StatusFilterChips(
     }
 }
 
+/**
+ * One chip of a single-select group, also used by the Invest feed for its three filter groups and
+ * for the removable chips above the counter ([removable] adds a decorative close icon). A tap on
+ * the selected chip is the caller's to read as "toggle off".
+ */
 @Composable
-private fun FilterChipItem(group: String, text: String, selected: Boolean, onClick: () -> Unit) {
+internal fun FilterChipItem(
+    group: String,
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    removable: Boolean = false,
+) {
     val spoken = stringResource(
         if (selected) R.string.chip_selected_a11y else R.string.chip_not_selected_a11y,
         group,
@@ -114,6 +125,14 @@ private fun FilterChipItem(group: String, text: String, selected: Boolean, onCli
                 )
             }
             Text(text = text, style = MaterialTheme.typography.labelLarge)
+            if (removable) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_close),
+                    contentDescription = null,
+                    tint = colors.link,
+                    modifier = Modifier.size(CheckSize),
+                )
+            }
         }
     }
 }

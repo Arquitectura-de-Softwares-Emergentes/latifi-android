@@ -60,7 +60,10 @@ fun PrimaryButton(
     }
 }
 
-/** An alternative action, outlined with the 1.5dp control border. */
+/**
+ * An alternative action, outlined with the 1.5dp control border. [spokenLabel] is for a button
+ * whose visible word is short but whose screen reader name must say what it acts on.
+ */
 @Composable
 fun SecondaryButton(
     text: String,
@@ -70,12 +73,19 @@ fun SecondaryButton(
     disabledReason: String? = null,
     loading: Boolean = false,
     fillMaxWidth: Boolean = true,
+    spokenLabel: String? = null,
 ) {
     ButtonWithReason(enabled, disabledReason, fillMaxWidth, modifier) { buttonModifier ->
         OutlinedButton(
             onClick = onClick,
             enabled = enabled && !loading,
-            modifier = buttonModifier,
+            // A button in a list says which item it acts on ("Fund request of 250.00 tUSD"), so the
+            // spoken label replaces the short visible word while the visible word stays in the name.
+            modifier = if (spokenLabel != null) {
+                buttonModifier.semantics { contentDescription = spokenLabel }
+            } else {
+                buttonModifier
+            },
             shape = LatiFiShapes.button,
             border = BorderStroke(ControlBorderWidth, MaterialTheme.colorScheme.outline),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),

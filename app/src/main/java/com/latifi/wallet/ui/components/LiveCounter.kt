@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -16,18 +17,12 @@ import androidx.compose.ui.semantics.semantics
  */
 @Composable
 fun LiveCounter(text: String?, loadingText: String, modifier: Modifier = Modifier) {
-    if (text == null) {
-        Text(
-            text = loadingText,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = modifier,
-        )
-    } else {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = modifier.semantics { liveRegion = LiveRegionMode.Polite },
-        )
-    }
+    // One Text node for both states, so a focus request made while the count loads survives the
+    // change. Only the live region comes and goes: loading text is plain, the count is polite.
+    Text(
+        text = text ?: loadingText,
+        style = MaterialTheme.typography.bodyMedium,
+        color = if (text == null) MaterialTheme.colorScheme.onSurfaceVariant else Color.Unspecified,
+        modifier = modifier.then(if (text != null) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier),
+    )
 }
