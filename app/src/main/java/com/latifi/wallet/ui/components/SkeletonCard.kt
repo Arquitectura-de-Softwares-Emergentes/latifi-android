@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -53,6 +54,9 @@ fun SkeletonList(
     }
 }
 
+/** Test tag of the content of each skeleton card, so a UI test can count the cards. */
+const val SKELETON_CARD_TAG = "skeleton_card"
+
 @Composable
 fun SkeletonCard(modifier: Modifier = Modifier) {
     val animate = remember { ValueAnimator.areAnimatorsEnabled() }
@@ -73,7 +77,7 @@ fun SkeletonCard(modifier: Modifier = Modifier) {
         border = BorderStroke(1.dp, LatiFiTheme.colors.outlineDecor),
     ) {
         Column(
-            modifier = Modifier.padding(Spacing.lg).alpha(alpha),
+            modifier = Modifier.padding(Spacing.lg).alpha(alpha).testTag(SKELETON_CARD_TAG),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             Bar(width = 140.dp, height = 28.dp)

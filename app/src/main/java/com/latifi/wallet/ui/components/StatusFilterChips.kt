@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,9 @@ import com.latifi.wallet.ui.theme.Spacing
 
 /** One choice of a [StatusFilterChips] group. [text] is the visible word. */
 data class ChipOption<T>(val value: T, val text: String)
+
+/** Test tag of the check icon on the selected chip, so a UI test can prove it is there. */
+const val FILTER_CHECK_TAG = "filter_check"
 
 private val CheckSize = 18.dp
 private val ChipBorder = 1.5.dp
@@ -106,7 +110,7 @@ private fun FilterChipItem(group: String, text: String, selected: Boolean, onCli
                     painter = painterResource(R.drawable.ic_check),
                     contentDescription = null,
                     tint = colors.link,
-                    modifier = Modifier.size(CheckSize),
+                    modifier = Modifier.size(CheckSize).testTag(FILTER_CHECK_TAG),
                 )
             }
             Text(text = text, style = MaterialTheme.typography.labelLarge)
