@@ -14,6 +14,7 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -21,6 +22,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SdkSuppress
@@ -41,6 +43,7 @@ import com.latifi.wallet.ui.components.FILTER_CHECK_TAG
 import com.latifi.wallet.ui.components.SKELETON_CARD_TAG
 import com.latifi.wallet.ui.theme.LatiFiTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -233,7 +236,9 @@ class LoansScreenTest {
     fun loadMoreAppearsWhenThereAreMoreItems() {
         show(listState(content = LoansContent.Items(cards, hasMore = true), counter = 25))
 
-        rule.onNodeWithText(text(R.string.load_more)).assertExists()
+        // The footer is the last item of a lazy list, so scroll to it first.
+        rule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(text(R.string.load_more)))
+        rule.onNodeWithText(text(R.string.load_more)).assertIsDisplayed()
     }
 
     @Test
@@ -248,7 +253,8 @@ class LoansScreenTest {
     fun withNoRateTheCardsSayLocalValueUnavailableAndStillShowTheAmount() {
         show(listState(rates = RatesState.Unavailable))
 
-        rule.onAllNodes(hasText(text(R.string.local_unavailable))).assertCountEquals(cards.size)
+        // The list is lazy, so only the cards that fit on the screen exist. At least one must say it.
+        assertTrue(rule.onAllNodes(hasText(text(R.string.local_unavailable))).fetchSemanticsNodes().isNotEmpty())
         rule.onNodeWithText("250.00 tUSD", substring = true).assertExists()
     }
 

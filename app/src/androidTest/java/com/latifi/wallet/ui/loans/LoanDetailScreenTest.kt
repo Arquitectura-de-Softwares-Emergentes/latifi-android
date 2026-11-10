@@ -151,7 +151,9 @@ class LoanDetailScreenTest {
 
         rule.onNodeWithText(text(R.string.pay_cta)).assertDoesNotExist()
         rule.onNodeWithText(text(R.string.loan_waiting_lender)).assertIsDisplayed()
-        rule.onNodeWithText(text(R.string.installments_list_title)).assertDoesNotExist()
+        // The label of the Installments detail row also reads "Installments", so only the heading counts.
+        rule.onNode(hasText(text(R.string.installments_list_title)) and SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+            .assertDoesNotExist()
     }
 
     @Test
