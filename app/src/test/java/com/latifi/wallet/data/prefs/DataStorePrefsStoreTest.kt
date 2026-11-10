@@ -1,6 +1,7 @@
 package com.latifi.wallet.data.prefs
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import com.latifi.wallet.core.LocalCurrency
 import com.latifi.wallet.domain.model.AppRole
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -74,5 +75,29 @@ class DataStorePrefsStoreTest {
         assertEquals(AppRole.Borrower, prefs.role.first())
         prefs.setRole(AppRole.Lender)
         assertEquals(AppRole.Lender, prefs.role.first())
+    }
+
+    @Test
+    fun theCurrencyDefaultsToPenAndPersistsAcrossANewStore() = runBlocking {
+        val file = File(tmp.root, "e.preferences_pb")
+        val first = store(file)
+        assertEquals(LocalCurrency.PEN, first.currency.first())
+
+        first.setCurrency(LocalCurrency.BRL)
+        scopes.first().cancel()
+
+        assertEquals(LocalCurrency.BRL, store(file).currency.first())
+    }
+
+    @Test
+    fun clearingTheRoleKeepsTheCurrency() = runBlocking {
+        val prefs = store(File(tmp.root, "f.preferences_pb"))
+        prefs.setRole(AppRole.Lender)
+        prefs.setCurrency(LocalCurrency.ARS)
+
+        prefs.clearRole()
+
+        assertNull(prefs.role.first())
+        assertEquals(LocalCurrency.ARS, prefs.currency.first())
     }
 }

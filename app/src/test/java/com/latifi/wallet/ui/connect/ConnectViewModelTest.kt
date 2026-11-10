@@ -1,12 +1,20 @@
 package com.latifi.wallet.ui.connect
 
 import app.cash.turbine.test
+import com.latifi.wallet.data.fake.FakeProfileRepository
 import com.latifi.wallet.data.fake.FakeWalletGateway
+import com.latifi.wallet.data.session.InMemorySessionStore
 import com.latifi.wallet.domain.auth.ReauthCoordinator
 import com.latifi.wallet.domain.auth.SignInOutcome
 import com.latifi.wallet.domain.auth.SignInReason
 import com.latifi.wallet.domain.auth.SignInRequest
 import com.latifi.wallet.domain.model.AppRole
+import com.latifi.wallet.domain.model.Contact
+import com.latifi.wallet.domain.model.ContactType
+import com.latifi.wallet.domain.model.Profile
+import com.latifi.wallet.domain.profile.PostSignInUseCase
+import com.latifi.wallet.domain.profile.SessionHints
+import com.latifi.wallet.domain.session.Session
 import com.latifi.wallet.domain.wallet.WalletFailure
 import com.latifi.wallet.domain.wallet.WalletState
 import com.latifi.wallet.support.FakePrefsStore
@@ -48,6 +56,9 @@ class ConnectViewModelTest {
         val wallet: FakeWalletGateway,
         val reauth: RecordingReauth,
         val overlays: OverlayController,
+        val sessions: InMemorySessionStore,
+        val profiles: FakeProfileRepository,
+        val hints: SessionHints,
         val vm: ConnectViewModel,
     )
 
@@ -58,9 +69,15 @@ class ConnectViewModelTest {
         val wallet = FakeWalletGateway(scope = backgroundScope, initialState = initial, connectDelayMillis = 500)
         val reauth = RecordingReauth()
         val overlays = OverlayController()
-        val vm = ConnectViewModel(wallet, reauth, FakePrefsStore(role = role), overlays, testConfig())
+        val sessions = InMemorySessionStore()
+        val profiles = FakeProfileRepository()
+        val hints = SessionHints()
+        val vm = ConnectViewModel(
+            wallet, reauth, FakePrefsStore(role = role), overlays, testConfig(),
+            sessions, PostSignInUseCase(profiles, hints),
+        )
         runCurrent()
-        return Rig(wallet, reauth, overlays, vm)
+        return Rig(wallet, reauth, overlays, sessions, profiles, hints, vm)
     }
 
     @Test
@@ -161,5 +178,37 @@ class ConnectViewModelTest {
             assertEquals(ConnectEffect.OpenLink(testConfig().termsUrl), awaitItem())
             assertEquals(ConnectEffect.OpenLink(testConfig().privacyUrl), awaitItem())
         }
+    }
+
+    private suspend fun InMemorySessionStore.signInAs(address: String) =
+        save(Session(address, "token", java.time.Instant.parse("2030-01-01T00:00:00Z")))
+
+    @Test
+    fun aSignedOutcomeQueuesTheGreetingWhenTheAddressAlreadyHasAProfile() = runTest {
+        val rig = rig(initial = WalletState.Connected("0xabc"))
+        val address = "0xAbC0000000000000000000000000000000000001"
+        rig.sessions.signInAs(address)
+        val at = java.time.Instant.parse("2026-11-01T00:00:00Z")
+        rig.profiles.seed(Profile(address, "Ana Torres", Contact(ContactType.EMAIL, "ana@example.com"), at, at))
+
+        rig.vm.effect.test {
+            rig.reauth.pending.complete(SignInOutcome.Signed)
+            runCurrent()
+            assertEquals(ConnectEffect.GoToRole, awaitItem())
+        }
+        assertEquals("Ana Torres", rig.hints.greetingName.value)
+    }
+
+    @Test
+    fun aSignedOutcomeQueuesNoGreetingWhenThereIsNoProfile() = runTest {
+        val rig = rig(initial = WalletState.Connected("0xabc"))
+        rig.sessions.signInAs("0xAbC0000000000000000000000000000000000002")
+
+        rig.vm.effect.test {
+            rig.reauth.pending.complete(SignInOutcome.Signed)
+            runCurrent()
+            assertEquals(ConnectEffect.GoToRole, awaitItem())
+        }
+        assertEquals(null, rig.hints.greetingName.value)
     }
 }

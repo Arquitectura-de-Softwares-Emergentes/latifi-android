@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.latifi.wallet.core.LocalCurrency
 import com.latifi.wallet.domain.model.AppRole
 import com.latifi.wallet.domain.prefs.PrefsStore
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +16,7 @@ const val PREFS_FILE_NAME = "latifi_prefs"
 
 /**
  * Preferences kept in a Preferences DataStore. It is built from a given [DataStore] so a test
- * can pass one that lives in a temporary file. Nothing here is sensitive: a role and a flag.
+ * can pass one that lives in a temporary file. Nothing here is sensitive: a role, a flag and the local currency code.
  */
 class DataStorePrefsStore(private val store: DataStore<Preferences>) : PrefsStore {
     override val role: Flow<AppRole?> = store.data.map { prefs ->
@@ -23,6 +24,10 @@ class DataStorePrefsStore(private val store: DataStore<Preferences>) : PrefsStor
     }
 
     override val onboardingSeen: Flow<Boolean> = store.data.map { it[ONBOARDING_SEEN_KEY] ?: false }
+
+    override val currency: Flow<LocalCurrency> = store.data.map { prefs ->
+        prefs[CURRENCY_KEY]?.let(LocalCurrency::fromCode) ?: LocalCurrency.PEN
+    }
 
     override suspend fun setRole(role: AppRole) {
         store.edit { it[ROLE_KEY] = role.name }
@@ -36,8 +41,13 @@ class DataStorePrefsStore(private val store: DataStore<Preferences>) : PrefsStor
         store.edit { it[ONBOARDING_SEEN_KEY] = seen }
     }
 
+    override suspend fun setCurrency(currency: LocalCurrency) {
+        store.edit { it[CURRENCY_KEY] = currency.code }
+    }
+
     private companion object {
         val ROLE_KEY = stringPreferencesKey("role")
+        val CURRENCY_KEY = stringPreferencesKey("currency")
         val ONBOARDING_SEEN_KEY = booleanPreferencesKey("onboarding_seen")
     }
 }
