@@ -37,11 +37,14 @@ class RoutesRegistryTest {
     }
 
     @Test
-    fun theShellRegistersTheTabContainerAndTheSixTabs() {
+    fun theShellAndTheFirstRunGraphRegisterTheirRoutes() {
         val scan = Scan.of(ResourceScan.SOURCE_ROOT)
 
         assertEquals(
-            setOf("MAIN", "HOME", "LOANS", "REPUTATION", "INVEST", "PORTFOLIO", "PROFILE"),
+            setOf(
+                "ONBOARDING", "HOW_IT_WORKS", "CONNECT", "ROLE",
+                "MAIN", "HOME", "LOANS", "REPUTATION", "INVEST", "PORTFOLIO", "PROFILE",
+            ),
             scan.registeredRoutes,
         )
     }
@@ -137,13 +140,13 @@ class RoutesRegistryTest {
     companion object {
         /** Routes whose screen is not built yet. Remove a name in the plan that registers it. */
         val PENDING_ROUTES = setOf(
-            "ONBOARDING", "HOW_IT_WORKS", "CONNECT", "ROLE", "PROFILE_FORM",
+            "PROFILE_FORM",
             "LOAN_DETAIL", "REQUEST_DETAIL", "INVESTMENT_DETAIL",
             "REQUEST_LOAN", "PAY", "FUND",
         )
 
         /** Overlays whose sheet is not built yet. Remove a name in the plan that registers it. */
-        val PENDING_OVERLAYS = setOf("SIGN_IN", "TX_STATUS", "COINS", "WALLET_HELP")
+        val PENDING_OVERLAYS = setOf("TX_STATUS", "COINS")
 
         fun findings(scan: Scan, pendingRoutes: Set<String>, pendingOverlays: Set<String>): List<String> {
             val found = mutableListOf<String>()

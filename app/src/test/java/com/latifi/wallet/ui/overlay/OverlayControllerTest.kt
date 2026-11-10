@@ -21,10 +21,44 @@ class OverlayControllerTest {
     }
 
     @Test
-    fun onlyOneOverlayExistsAtATime() {
+    fun overlaysStackAndTheTopOneIsCurrent() {
+        val controller = OverlayController()
+        controller.show(Overlays.TX_STATUS)
+        controller.show(Overlays.SIGN_IN)
+        assertEquals(Overlays.SIGN_IN, controller.current.value)
+
+        controller.dismiss()
+
+        assertEquals(Overlays.TX_STATUS, controller.current.value)
+    }
+
+    @Test
+    fun showingTheOverlayThatIsAlreadyOnTopChangesNothing() {
+        val controller = OverlayController()
+        controller.show(Overlays.SIGN_IN)
+        controller.show(Overlays.SIGN_IN)
+        controller.dismiss()
+        assertNull(controller.current.value)
+    }
+
+    @Test
+    fun aNamedOverlayCanBeClosedBelowTheTop() {
+        val controller = OverlayController()
+        controller.show(Overlays.TX_STATUS)
+        controller.show(Overlays.SIGN_IN)
+
+        controller.dismiss(Overlays.TX_STATUS)
+
+        assertEquals(Overlays.SIGN_IN, controller.current.value)
+        controller.dismiss()
+        assertNull(controller.current.value)
+    }
+
+    @Test
+    fun dismissingAnOverlayThatIsNotOpenChangesNothing() {
         val controller = OverlayController()
         controller.show(Overlays.COINS)
-        controller.show(Overlays.WALLET_HELP)
-        assertEquals(Overlays.WALLET_HELP, controller.current.value)
+        controller.dismiss(Overlays.WALLET_HELP)
+        assertEquals(Overlays.COINS, controller.current.value)
     }
 }
