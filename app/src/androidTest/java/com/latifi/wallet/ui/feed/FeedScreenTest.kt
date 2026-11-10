@@ -88,6 +88,10 @@ class FeedScreenTest {
     private val opened = mutableListOf<BigInteger>()
     private val funded = mutableListOf<BigInteger>()
     private val effects = Channel<FeedEffect>(Channel.BUFFERED)
+
+    // One flow for the whole test, like the view model's own: a new flow on every recomposition
+    // would restart the screen's collector and cancel the snackbar it was about to show.
+    private val effectFlow = effects.receiveAsFlow()
     private var uiState by mutableStateOf(FeedUiState())
 
     private fun text(res: Int, vararg args: Any) = context.getString(res, *args)
@@ -179,7 +183,7 @@ class FeedScreenTest {
                         onEvent = ::reduce,
                         onOpen = { opened += it },
                         onFund = { funded += it },
-                        effects = effects.receiveAsFlow(),
+                        effects = effectFlow,
                     )
                 }
                 if (fontScale != null) WithFontScale(fontScale) { screen() } else screen()
@@ -468,7 +472,9 @@ class FeedScreenTest {
         show(state(filters = FeedFilters(risk = Risk.Medium, term = TermLimit.UpTo60)), darkTheme = false)
         openFilters()
 
-        rule.onNodeWithText(text(R.string.group_amount)).assertIsDisplayed()
+        // The risk group sits at the top of the panel, so it is on screen. The lower groups may not be.
+        rule.onNode(hasText(text(R.string.group_risk)) and SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+            .assertIsDisplayed()
         saveScreenshot("feed-filters-light.png")
     }
 
@@ -477,7 +483,9 @@ class FeedScreenTest {
         show(state(filters = FeedFilters(risk = Risk.Medium, term = TermLimit.UpTo60)), darkTheme = true)
         openFilters()
 
-        rule.onNodeWithText(text(R.string.group_amount)).assertIsDisplayed()
+        // The risk group sits at the top of the panel, so it is on screen. The lower groups may not be.
+        rule.onNode(hasText(text(R.string.group_risk)) and SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+            .assertIsDisplayed()
         saveScreenshot("feed-filters-dark.png")
     }
 
