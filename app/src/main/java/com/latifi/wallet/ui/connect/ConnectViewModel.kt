@@ -7,6 +7,8 @@ import com.latifi.wallet.domain.auth.ReauthCoordinator
 import com.latifi.wallet.domain.auth.SignInOutcome
 import com.latifi.wallet.domain.auth.SignInReason
 import com.latifi.wallet.domain.prefs.PrefsStore
+import com.latifi.wallet.domain.profile.PostSignInUseCase
+import com.latifi.wallet.domain.session.SessionStore
 import com.latifi.wallet.domain.wallet.WalletGateway
 import com.latifi.wallet.domain.wallet.WalletState
 import com.latifi.wallet.ui.overlay.OverlayController
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 enum class ConnectPhase { Idle, Waiting, Failed, NotConfigured }
@@ -58,6 +61,8 @@ class ConnectViewModel @Inject constructor(
     private val prefs: PrefsStore,
     private val overlays: OverlayController,
     private val config: AppConfig,
+    private val sessions: SessionStore,
+    private val postSignIn: PostSignInUseCase,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(ConnectUiState())
     private val effects = Channel<ConnectEffect>(Channel.BUFFERED)
@@ -117,6 +122,11 @@ class ConnectViewModel @Inject constructor(
         viewModelScope.launch {
             when (reauth.ensureSession(SignInReason.FirstSignIn)) {
                 SignInOutcome.Signed -> {
+                    // A returning person's profile loads silently here and queues the greeting for
+                    // Home. The wait is capped, so a slow network never holds the person on Connect.
+                    sessions.current()?.address?.let { address ->
+                        withTimeoutOrNull(PROFILE_LOAD_LIMIT_MILLIS) { postSignIn.run(address) }
+                    }
                     val hasRole = prefs.role.first() != null
                     effects.send(if (hasRole) ConnectEffect.GoToMain else ConnectEffect.GoToRole)
                 }
@@ -127,5 +137,9 @@ class ConnectViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private companion object {
+        const val PROFILE_LOAD_LIMIT_MILLIS = 2_000L
     }
 }

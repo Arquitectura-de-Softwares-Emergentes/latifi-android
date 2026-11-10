@@ -73,6 +73,8 @@ class NavigationModelTest {
         val route = Routes.profileForm("loan/7")
         assertEquals("profile_form?returnTo=loan%2F7", route)
         assertNotNull(Routes.PROFILE_FORM)
+        assertEquals("profile_form?returnTo=loan%2F7&gate=true", Routes.profileForm("loan/7", gate = true))
+        assertEquals("profile_form?gate=true", Routes.profileForm(gate = true))
     }
 
     @Test

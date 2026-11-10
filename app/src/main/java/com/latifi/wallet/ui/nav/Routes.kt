@@ -7,6 +7,9 @@ import java.net.URLEncoder
 object RouteArgs {
     const val LOAN_ID = "loanId"
     const val RETURN_TO = "returnTo"
+
+    /** True when the profile form opened because the profile gate stopped an action. */
+    const val GATE = "gate"
 }
 
 /**
@@ -22,7 +25,7 @@ object Routes {
     const val HOW_IT_WORKS = "how_it_works"
     const val CONNECT = "connect"
     const val ROLE = "role"
-    const val PROFILE_FORM = "profile_form?returnTo={returnTo}"
+    const val PROFILE_FORM = "profile_form?returnTo={returnTo}&gate={gate}"
 
     /** The tab container. Its tabs are nested destinations. */
     const val MAIN = "main"
@@ -47,9 +50,17 @@ object Routes {
         LOAN_DETAIL, REQUEST_DETAIL, INVESTMENT_DETAIL, REQUEST_LOAN, PAY, FUND,
     )
 
-    /** [returnTo] is the route to open after saving. Null means the form closes on its own. */
-    fun profileForm(returnTo: String? = null): String =
-        if (returnTo == null) "profile_form" else "profile_form?returnTo=${URLEncoder.encode(returnTo, "UTF-8")}"
+    /**
+     * [returnTo] is the route to open after saving. Null means the form closes on its own. [gate]
+     * is true when a blocked action opened the form, so the save hands a result back to it.
+     */
+    fun profileForm(returnTo: String? = null, gate: Boolean = false): String {
+        val query = buildList {
+            if (returnTo != null) add("returnTo=${URLEncoder.encode(returnTo, "UTF-8")}")
+            if (gate) add("gate=true")
+        }
+        return if (query.isEmpty()) "profile_form" else "profile_form?" + query.joinToString("&")
+    }
 
     fun loanDetail(loanId: BigInteger): String = "loan/$loanId"
 

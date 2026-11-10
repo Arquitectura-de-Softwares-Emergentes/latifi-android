@@ -34,7 +34,8 @@ fun LatiFiNavHost(
         modifier = modifier,
     ) {
         onboardingGraph(navController, returning = startDestination == Routes.CONNECT)
-        mainTabsGraph { roleState.value }
+        profileGraph(navController)
+        mainTabsGraph(navController) { roleState.value }
         extraGraphs()
     }
 }

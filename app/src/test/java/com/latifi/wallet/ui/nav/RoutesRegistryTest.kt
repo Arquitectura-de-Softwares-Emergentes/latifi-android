@@ -37,12 +37,12 @@ class RoutesRegistryTest {
     }
 
     @Test
-    fun theShellAndTheFirstRunGraphRegisterTheirRoutes() {
+    fun theShellTheFirstRunGraphAndTheProfileFormRegisterTheirRoutes() {
         val scan = Scan.of(ResourceScan.SOURCE_ROOT)
 
         assertEquals(
             setOf(
-                "ONBOARDING", "HOW_IT_WORKS", "CONNECT", "ROLE",
+                "ONBOARDING", "HOW_IT_WORKS", "CONNECT", "ROLE", "PROFILE_FORM",
                 "MAIN", "HOME", "LOANS", "REPUTATION", "INVEST", "PORTFOLIO", "PROFILE",
             ),
             scan.registeredRoutes,
@@ -140,7 +140,6 @@ class RoutesRegistryTest {
     companion object {
         /** Routes whose screen is not built yet. Remove a name in the plan that registers it. */
         val PENDING_ROUTES = setOf(
-            "PROFILE_FORM",
             "LOAN_DETAIL", "REQUEST_DETAIL", "INVESTMENT_DETAIL",
             "REQUEST_LOAN", "PAY", "FUND",
         )

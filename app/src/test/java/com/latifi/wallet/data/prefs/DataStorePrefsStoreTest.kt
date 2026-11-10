@@ -1,11 +1,14 @@
 package com.latifi.wallet.data.prefs
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import com.latifi.wallet.core.LocalCurrency
 import com.latifi.wallet.domain.model.AppRole
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -31,6 +34,15 @@ class DataStorePrefsStoreTest {
         return DataStorePrefsStore(PreferenceDataStoreFactory.create(scope = scope) { file })
     }
 
+    /**
+     * Ends the first store and waits until its scope is really finished. DataStore frees the file
+     * only then, and a new store on the same file made before that throws "multiple DataStores
+     * active for the same file", which is a race on a slow machine.
+     */
+    private suspend fun closeFirstStore() {
+        scopes.first().coroutineContext[Job]!!.cancelAndJoin()
+    }
+
     @After
     fun tearDown() = scopes.forEach { it.cancel() }
 
@@ -47,7 +59,7 @@ class DataStorePrefsStoreTest {
         val first = store(file)
         first.setRole(AppRole.Lender)
         first.setOnboardingSeen(true)
-        scopes.first().cancel()
+        closeFirstStore()
 
         val second = store(file)
         assertEquals(AppRole.Lender, second.role.first())
@@ -74,5 +86,29 @@ class DataStorePrefsStoreTest {
         assertEquals(AppRole.Borrower, prefs.role.first())
         prefs.setRole(AppRole.Lender)
         assertEquals(AppRole.Lender, prefs.role.first())
+    }
+
+    @Test
+    fun theCurrencyDefaultsToPenAndPersistsAcrossANewStore() = runBlocking {
+        val file = File(tmp.root, "e.preferences_pb")
+        val first = store(file)
+        assertEquals(LocalCurrency.PEN, first.currency.first())
+
+        first.setCurrency(LocalCurrency.BRL)
+        closeFirstStore()
+
+        assertEquals(LocalCurrency.BRL, store(file).currency.first())
+    }
+
+    @Test
+    fun clearingTheRoleKeepsTheCurrency() = runBlocking {
+        val prefs = store(File(tmp.root, "f.preferences_pb"))
+        prefs.setRole(AppRole.Lender)
+        prefs.setCurrency(LocalCurrency.ARS)
+
+        prefs.clearRole()
+
+        assertNull(prefs.role.first())
+        assertEquals(LocalCurrency.ARS, prefs.currency.first())
     }
 }

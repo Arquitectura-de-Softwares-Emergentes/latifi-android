@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- S05 Profile form -->
+    <string name="profile_gate_title">Primero agrega tus datos</string>
+    <string name="profile_gate_body_borrow">Los prestamistas necesitan saber a quién le prestan antes de fondear. Agrega tu nombre y un medio de contacto.</string>
+    <string name="profile_gate_body_lend">Los prestatarios ven quién fondea su solicitud. Agrega tu nombre y un medio de contacto.</string>
+    <string name="profile_title">Tus datos</string>
+    <string name="field_name">Nombre completo</string>
+    <string name="field_name_help">Se muestra a la otra persona del préstamo.</string>
+    <string name="field_contact_type">Tipo de contacto</string>
+    <string name="contact_email">Correo electrónico</string>
+    <string name="contact_phone">Teléfono</string>
+    <string name="field_contact_email">Correo electrónico</string>
+    <string name="field_contact_phone">Número de teléfono</string>
+    <string name="contact_privacy">Solo tú ves tu contacto. Las demás personas ven solo tu nombre.</string>
+    <string name="err_name_required">Escribe tu nombre.</string>
+    <string name="err_name_long">Usa 80 caracteres o menos.</string>
+    <string name="err_contact_email">Escribe un correo válido, como nombre@ejemplo.com.</string>
+    <string name="err_contact_phone">Escribe un teléfono válido con el código de país.</string>
+    <plurals name="profile_errors_count">
+        <item quantity="one">1 campo necesita tu atención.</item>
+        <item quantity="other">%d campos necesitan tu atención.</item>
+    </plurals>
+    <string name="profile_save">Guardar datos</string>
+    <string name="profile_saved">Datos guardados</string>
+    <string name="profile_save_error">No pudimos guardar tus datos. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="welcome_back">Hola de nuevo, %1$s</string>
+
+    <!-- S17 Profile -->
+    <string name="profile_section_personal">Datos personales</string>
+    <string name="profile_section_wallet">Billetera</string>
+    <string name="profile_section_prefs">Preferencias</string>
+    <string name="profile_section_help">Ayuda</string>
+    <string name="profile_section_about">Acerca de</string>
+    <string name="profile_address">Dirección %1$s</string>
+    <string name="profile_copy_address">Copiar dirección</string>
+    <string name="profile_address_copied">Dirección copiada</string>
+    <string name="profile_edit">Editar datos</string>
+    <string name="profile_role">Rol</string>
+    <string name="profile_role_switch_lender">Cambiar a prestamista</string>
+    <string name="profile_role_switch_borrower">Cambiar a prestatario</string>
+    <string name="profile_language">Idioma</string>
+    <string name="language_changed_en">Language changed to English</string>
+    <string name="language_changed_es">Idioma cambiado a Español</string>
+    <string name="profile_currency">Moneda local</string>
+    <string name="profile_how">Cómo funciona LatiFi</string>
+    <string name="profile_version">Versión %1$s</string>
+    <string name="profile_network">Red: red de pruebas Polygon Amoy</string>
+    <!-- Not in the UI-SPEC table: tells a Demo build apart from a live one in About. -->
+    <string name="profile_mode_demo">Modo: Demo, con datos de ejemplo</string>
+    <string name="profile_mode_live">Modo: En vivo</string>
+    <string name="disconnect_action">Desconectar billetera</string>
+    <string name="disconnect_title">¿Desconectar tu billetera?</string>
+    <string name="disconnect_body">Cerrarás tu sesión en LatiFi. Tus préstamos y tu dinero siguen en tu billetera y en la red. Puedes conectarte otra vez cuando quieras.</string>
+    <string name="disconnect_confirm">Desconectar billetera</string>
+    <string name="disconnect_keep">Mantener billetera conectada</string>
+
+    <string name="rates_attribution_a11y">Rates By Exchange Rate API, abre el sitio web</string>
+
+    <!-- Local currency names -->
+    <string name="currency_pen">Sol peruano (PEN)</string>
+    <string name="currency_cop">Peso colombiano (COP)</string>
+    <string name="currency_mxn">Peso mexicano (MXN)</string>
+    <string name="currency_ars">Peso argentino (ARS)</string>
+    <string name="currency_brl">Real brasileño (BRL)</string>
+    <string name="currency_clp">Peso chileno (CLP)</string>
+</resources>
