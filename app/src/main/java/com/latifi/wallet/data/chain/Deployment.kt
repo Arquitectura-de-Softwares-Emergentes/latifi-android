@@ -8,6 +8,9 @@ package com.latifi.wallet.data.chain
 object Deployment {
     const val CHAIN_ID: Long = 80002
 
+    /** Release tag of latifi-contracts that produced these addresses. */
+    const val RELEASE: String = "v0.2.0"
+
     /** CAIP-2 chain id used by the wallet session request. */
     const val CAIP_CHAIN_ID: String = "eip155:80002"
 
