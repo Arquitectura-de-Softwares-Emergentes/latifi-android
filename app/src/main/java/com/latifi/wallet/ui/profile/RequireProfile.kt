@@ -64,23 +64,44 @@ fun rememberRequireProfile(
 
     return {
         scope.launch {
-            val address = session.current()?.address
-            if (address == null) {
-                currentOnError(IllegalStateException("No signed-in address"))
-                return@launch
-            }
-            gate.check(address).fold(
-                onSuccess = { found ->
-                    when (found) {
-                        GateResult.Complete -> currentOnReady()
-                        GateResult.Missing -> {
-                            val here = navController.currentDestination?.route ?: Routes.MAIN
-                            navController.navigate(Routes.profileForm(returnTo = here, gate = true))
-                        }
-                    }
+            runProfileGate(
+                gate = gate,
+                session = session,
+                onReady = { currentOnReady() },
+                onMissing = {
+                    val here = navController.currentDestination?.route ?: Routes.MAIN
+                    navController.navigate(Routes.profileForm(returnTo = here, gate = true))
                 },
-                onFailure = { currentOnError(it) },
+                onError = { currentOnError(it) },
             )
         }
     }
+}
+
+/**
+ * The decision of [rememberRequireProfile] without Compose, so a JVM test can prove it: no signed-in
+ * address or a failed check goes to [onError], a complete profile to [onReady], and a missing one to
+ * [onMissing]. Exactly one of the three runs, and [onReady] never runs unless the profile is complete.
+ */
+suspend fun runProfileGate(
+    gate: ProfileGate,
+    session: SessionStore,
+    onReady: () -> Unit,
+    onMissing: () -> Unit,
+    onError: (Throwable) -> Unit,
+) {
+    val address = session.current()?.address
+    if (address == null) {
+        onError(IllegalStateException("No signed-in address"))
+        return
+    }
+    gate.check(address).fold(
+        onSuccess = { found ->
+            when (found) {
+                GateResult.Complete -> onReady()
+                GateResult.Missing -> onMissing()
+            }
+        },
+        onFailure = { onError(it) },
+    )
 }

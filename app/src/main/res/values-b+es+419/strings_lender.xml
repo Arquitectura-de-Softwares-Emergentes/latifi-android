@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="detail_request_title">Detalle de la solicitud</string>
+    <string name="detail_earn">Ganarías</string>
+    <string name="detail_borrower">Prestatario</string>
+    <string name="detail_history_title">Historial reciente de pagos</string>
+    <string name="detail_history_new">Prestatario nuevo: aún no tiene historial de pagos.</string>
+    <string name="detail_terms_fixed">La tasa, el plazo y las cuotas quedan fijos cuando fondeas.</string>
+    <string name="fund_cta">Fondear solicitud</string>
+    <string name="investment_details_title">Detalle de la inversión</string>
+</resources>

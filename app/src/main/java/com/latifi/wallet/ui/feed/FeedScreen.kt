@@ -57,19 +57,19 @@ private const val AUTO_LOAD_DISTANCE = 3
 
 /**
  * The Invest tab body. The view model lives in this back stack entry, so the filters and the sort
- * are still there when the person comes back from a detail. The request details (plan 05-10) and
- * the funding flow (plan 05-12) are not registered yet, so both callbacks do nothing here: a tap
- * never navigates to a route that does not exist.
+ * are still there when the person comes back from a detail. [onOpen] opens the request details.
+ * [onFund] starts the funding flow, which plan 05-12 registers: until then the caller passes a
+ * callback that does nothing, because a tap never navigates to a route that does not exist.
  */
 @Composable
-fun FeedRoute() {
+fun FeedRoute(onOpen: (BigInteger) -> Unit, onFund: (BigInteger) -> Unit) {
     val viewModel: FeedViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     FeedScreen(
         state = state,
         onEvent = viewModel::onEvent,
-        onOpen = { _: BigInteger -> },
-        onFund = { _: BigInteger -> },
+        onOpen = onOpen,
+        onFund = onFund,
         effects = viewModel.effects,
     )
 }

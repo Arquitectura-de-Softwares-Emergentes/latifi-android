@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="portfolio_title">Portafolio</string>
+    <string name="investment_lent">Prestado</string>
+    <string name="investment_expected">Retorno esperado</string>
+    <string name="portfolio_empty_title">Aún no has fondeado ninguna solicitud</string>
+    <string name="portfolio_empty_body">Revisa las solicitudes abiertas y fondea una para verla aquí.</string>
+</resources>
