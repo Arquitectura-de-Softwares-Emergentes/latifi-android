@@ -128,9 +128,10 @@ class RequestLoanScreenTest {
             { RequestLoanActions() },
         )
 
+        // The count sits at the top, so it is checked before the scrolls below move it out of view.
+        rule.onNodeWithText("2 fields need your attention.").assertIsDisplayed()
         rule.onNodeWithText(text(R.string.err_amount_range)).performScrollTo().assertIsDisplayed()
         rule.onNodeWithText(text(R.string.err_term_range)).performScrollTo().assertIsDisplayed()
-        rule.onNodeWithText("2 fields need your attention.").assertIsDisplayed()
     }
 
     @Test

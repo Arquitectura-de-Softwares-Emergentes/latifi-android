@@ -1,6 +1,8 @@
 package com.latifi.wallet.ui.pay
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -136,7 +138,7 @@ class PayFundScreenTest {
 
         rule.onNodeWithText(text(R.string.detail_earn), substring = true).performScrollTo().assertIsDisplayed()
         rule.onNodeWithText(text(R.string.fund_terms_fixed)).performScrollTo().assertIsDisplayed()
-        rule.onNodeWithText(text(R.string.fund_confirm)).assertIsDisplayed().performClick()
+        rule.onNode(hasText(text(R.string.fund_confirm)) and hasClickAction()).assertIsDisplayed().performClick()
 
         assertEquals(1, confirmed)
     }
@@ -147,7 +149,7 @@ class PayFundScreenTest {
         showFund(fundState(notOpen = true), onBackToRequests = { back += 1 })
 
         rule.onNodeWithText(text(R.string.tx_fail_notopen)).assertIsDisplayed()
-        rule.onNodeWithText(text(R.string.fund_confirm)).assertDoesNotExist()
+        rule.onNode(hasText(text(R.string.fund_confirm)) and hasClickAction()).assertDoesNotExist()
         rule.onNodeWithText(text(R.string.back_to_requests)).performClick()
 
         assertEquals(1, back)
