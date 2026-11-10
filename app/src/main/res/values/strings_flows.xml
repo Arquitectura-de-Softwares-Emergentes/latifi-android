@@ -3,4 +3,19 @@
     <string name="network_fee_note">Your wallet charges a small network fee to process each action. You see it before you sign.</string>
     <string name="tx_allow_title">Allow the payment</string>
     <string name="tx_allow_body">Your wallet will let the loan contract move exactly %1$s tUSD for this loan. Nothing else.</string>
+    <string name="pay_title">Pay installment %1$d of %2$d</string>
+    <string name="pay_amount">Amount to pay</string>
+    <string name="pay_due">Due %1$s</string>
+    <string name="pay_line">You pay from your wallet. LatiFi never moves your money.</string>
+    <string name="pay_late">This installment is late. You can still pay it.</string>
+    <string name="pay_confirm">Confirm payment</string>
+    <string name="pay_success_title">Installment paid</string>
+    <string name="pay_success_body">Your reputation updates shortly after the network confirms this payment.</string>
+    <string name="fund_title">Confirm funding</string>
+    <string name="fund_confirm">Confirm funding</string>
+    <string name="fund_terms_fixed">Terms are fixed when you sign.</string>
+    <string name="fund_success_title">Request funded</string>
+    <string name="fund_success_body">You will find it in Portfolio.</string>
+    <string name="fund_view_portfolio">View portfolio</string>
+    <string name="back_to_loans">Back to loans</string>
 </resources>
