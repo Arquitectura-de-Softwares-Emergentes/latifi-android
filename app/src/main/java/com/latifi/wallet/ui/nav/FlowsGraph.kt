@@ -9,8 +9,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.composable
 import com.latifi.wallet.ui.common.ErrorCopy
+import com.latifi.wallet.ui.fund.FundEffect
+import com.latifi.wallet.ui.fund.FundScreen
+import com.latifi.wallet.ui.fund.FundViewModel
+import com.latifi.wallet.ui.pay.PayEffect
+import com.latifi.wallet.ui.pay.PayScreen
+import com.latifi.wallet.ui.pay.PayViewModel
 import com.latifi.wallet.ui.profile.ProfileGateViewModel
 import com.latifi.wallet.ui.profile.rememberRequireProfile
 import com.latifi.wallet.ui.request.RequestLoanActions
@@ -27,6 +35,14 @@ const val OPEN_TAB_KEY = "open_tab"
  */
 fun NavGraphBuilder.flowsGraph(navController: NavHostController) {
     composable(Routes.REQUEST_LOAN) { RequestLoanRoute(navController) }
+    composable(
+        Routes.PAY,
+        arguments = listOf(navArgument(RouteArgs.LOAN_ID) { type = NavType.StringType }),
+    ) { PayRoute(navController) }
+    composable(
+        Routes.FUND,
+        arguments = listOf(navArgument(RouteArgs.LOAN_ID) { type = NavType.StringType }),
+    ) { FundRoute(navController) }
 }
 
 /**
@@ -59,7 +75,7 @@ private fun RequestLoanRoute(navController: NavHostController) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 RequestLoanEffect.Leave -> navController.popBackStack()
-                RequestLoanEffect.OpenLoans -> openLoansTab(navController)
+                RequestLoanEffect.OpenLoans -> openTab(navController, Routes.LOANS)
                 RequestLoanEffect.OpenProfileForm -> navController.navigate(Routes.profileForm())
                 is RequestLoanEffect.ProfileCheckFailed ->
                     Toast.makeText(context, ErrorCopy.textOf(ErrorCopy.kindOf(effect.error)).body, Toast.LENGTH_LONG).show()
@@ -89,8 +105,48 @@ private fun RequestLoanRoute(navController: NavHostController) {
     )
 }
 
-/** Back to the tab container with the Loans tab selected. */
-private fun openLoansTab(navController: NavHostController) {
-    runCatching { navController.getBackStackEntry(Routes.MAIN).savedStateHandle[OPEN_TAB_KEY] = Routes.LOANS }
+@Composable
+private fun PayRoute(navController: NavHostController) {
+    val viewModel: PayViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                PayEffect.OpenLoans -> openTab(navController, Routes.LOANS)
+            }
+        }
+    }
+    PayScreen(
+        state = state,
+        onConfirm = viewModel::onConfirm,
+        onReload = viewModel::reload,
+        onBack = { navController.popBackStack() },
+    )
+}
+
+@Composable
+private fun FundRoute(navController: NavHostController) {
+    val viewModel: FundViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                FundEffect.OpenRequests -> openTab(navController, Routes.INVEST)
+                FundEffect.OpenPortfolio -> openTab(navController, Routes.PORTFOLIO)
+            }
+        }
+    }
+    FundScreen(
+        state = state,
+        onConfirm = viewModel::onConfirm,
+        onBackToRequests = viewModel::onBackToRequests,
+        onReload = viewModel::reload,
+        onBack = { navController.popBackStack() },
+    )
+}
+
+/** Back to the tab container with [tabRoute] selected. */
+private fun openTab(navController: NavHostController, tabRoute: String) {
+    runCatching { navController.getBackStackEntry(Routes.MAIN).savedStateHandle[OPEN_TAB_KEY] = tabRoute }
     navController.popBackStack(Routes.MAIN, inclusive = false)
 }

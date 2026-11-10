@@ -31,7 +31,6 @@ private fun LoanDetailRoute(navController: NavHostController) {
         state = state,
         onReload = viewModel::reload,
         onBack = { navController.popBackStack() },
-        // The Pay installment screen is registered by plan 05-12, which wires this button.
-        onPay = {},
+        onPay = { id -> navController.navigate(Routes.pay(id)) },
     )
 }

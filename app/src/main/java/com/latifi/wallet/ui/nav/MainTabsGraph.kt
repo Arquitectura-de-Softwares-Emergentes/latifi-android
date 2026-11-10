@@ -3,7 +3,10 @@ package com.latifi.wallet.ui.nav
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import java.math.BigInteger
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,6 +67,7 @@ internal fun MainTabs(
                 HomeRoute(
                     onBrowse = { tabController.selectTab(TabDestination.Invest) },
                     onRequestLoan = requestLoan,
+                    onPay = { id -> rootController.navigate(Routes.pay(id)) },
                 )
             }
             composable(Routes.LOANS) {
@@ -72,10 +76,15 @@ internal fun MainTabs(
             }
             composable(Routes.REPUTATION) { ReputationRoute(rootController) }
             composable(Routes.INVEST) {
+                // The card button passes the profile gate and then opens the funding flow.
+                var pendingFund by remember { mutableStateOf<BigInteger?>(null) }
+                val fundGate = rememberGatedNavigation(rootController) { Routes.fund(pendingFund ?: BigInteger.ZERO) }
                 FeedRoute(
                     onOpen = { loanId -> rootController.navigate(Routes.requestDetail(loanId)) },
-                    // The funding flow is registered by plan 05-12. Until then the card button does nothing.
-                    onFund = {},
+                    onFund = { loanId ->
+                        pendingFund = loanId
+                        fundGate()
+                    },
                 )
             }
             composable(Routes.PORTFOLIO) {
