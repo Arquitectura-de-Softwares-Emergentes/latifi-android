@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_fee_note">Your wallet charges a small network fee to process each action. You see it before you sign.</string>
+    <string name="tx_allow_title">Allow the payment</string>
+    <string name="tx_allow_body">Your wallet will let the loan contract move exactly %1$s tUSD for this loan. Nothing else.</string>
+</resources>

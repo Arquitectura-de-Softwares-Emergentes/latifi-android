@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_fee_note">Tu billetera cobra una pequeña comisión de red para procesar cada acción. La ves antes de firmar.</string>
+    <string name="tx_allow_title">Permitir el pago</string>
+    <string name="tx_allow_body">Tu billetera permitirá que el contrato del préstamo mueva exactamente %1$s tUSD para este préstamo. Nada más.</string>
+</resources>

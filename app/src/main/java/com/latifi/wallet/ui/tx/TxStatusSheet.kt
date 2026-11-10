@@ -177,6 +177,12 @@ fun TxStatusSheetContent(
 
         StatusBlock(state = state, look = look)
 
+        // The approve step says what it allows: the exact amount and nothing else.
+        val allowAmount = context.allowAmountText
+        if (allowAmount != null && state !is TxState.Confirmed && state !is TxState.Failed) {
+            AllowDetail(allowAmount)
+        }
+
         when (state) {
             is TxState.Idle, is TxState.Pending -> {
                 PrimaryButton(
@@ -266,6 +272,22 @@ private fun StatusBlock(state: TxState, look: Look) {
 }
 
 @Composable
+private fun AllowDetail(amount: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        Text(
+            text = stringResource(R.string.tx_allow_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { heading() },
+        )
+        Text(
+            text = stringResource(R.string.tx_allow_body, amount),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
 private fun CancelButton(action: String, focus: FocusRequester, onEvent: (TxStatusEvent) -> Unit) {
     TertiaryButton(
         text = stringResource(R.string.tx_cancel, action),
@@ -300,6 +322,24 @@ private fun ConfirmedActions(
     primaryFocus: FocusRequester,
 ) {
     val hash = state.hash?.takeIf { Hex.isTxHash(it) }
+    val ctx = ui.context
+    val successTitle = ctx?.successTitleRes
+    if (successTitle != null) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Text(
+                text = stringResource(successTitle),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
+            )
+            ctx.successBodyRes?.let {
+                Text(
+                    text = stringResource(it),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
     if (hash != null) {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             Text(
