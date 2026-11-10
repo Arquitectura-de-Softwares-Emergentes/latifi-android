@@ -9,14 +9,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import com.latifi.wallet.ui.theme.LatiFiTheme
 import com.latifi.wallet.ui.theme.MinTouchTarget
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * A two choice dialog where the safe choice holds the default focus. A person who opens it
@@ -86,12 +90,20 @@ fun ConfirmDialog(
 
 /**
  * Asks for focus on the safe action as soon as the dialog window shows it. The dialog window
- * takes view focus a frame or two after it opens, so one request can be refused. It tries again
- * on the next frames, at most [MaxAttempts] times, and stops as soon as the focus is held.
+ * takes view focus a frame or two after it opens, so one request can be refused. It first waits
+ * for the dialog window to hold the window focus (at most [WindowFocusWaitMillis], so a window
+ * that never reports focus cannot block it), then tries on the next frames, at most
+ * [MaxAttempts] times, and stops as soon as the focus is held.
  */
 @Composable
 private fun FocusSafeActionOnShow(safeFocus: FocusRequester) {
+    val windowInfo = LocalWindowInfo.current
     LaunchedEffect(safeFocus) {
+        // A request made while the dialog window is not focused is accepted by Compose but the
+        // focus state stays inactive on the emulator, so the request waits for the window first.
+        withTimeoutOrNull(WindowFocusWaitMillis) {
+            snapshotFlow { windowInfo.isWindowFocused }.first { it }
+        }
         repeat(MaxAttempts) {
             if (runCatching { safeFocus.requestFocus() }.getOrDefault(false)) return@LaunchedEffect
             withFrameNanos { }
@@ -100,3 +112,4 @@ private fun FocusSafeActionOnShow(safeFocus: FocusRequester) {
 }
 
 private const val MaxAttempts = 5
+private const val WindowFocusWaitMillis = 1_000L
