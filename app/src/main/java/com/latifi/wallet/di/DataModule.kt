@@ -170,6 +170,11 @@ abstract class DataModule {
             AppMode.Live -> error("The live JSON-RPC client is added by plan 05-13. Build without a project id to use demo mode.")
         }
 
+        /** The 30 second wait for the indexer after a confirmed transaction. */
+        @Provides
+        @Singleton
+        fun provideIndexerLagWaiter(): IndexerLagWaiter = IndexerLagWaiter()
+
         @Provides
         @Singleton
         fun provideReceiptPoller(rpc: RpcClient): ReceiptPoller = ReceiptPoller(rpc)
