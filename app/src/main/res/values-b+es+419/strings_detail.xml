@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="loan_details_title">Detalle del préstamo</string>
+    <string name="installments_list_title">Cuotas</string>
+    <string name="installment_state_paid">Pagada</string>
+    <string name="installment_state_received">Recibida</string>
+    <string name="installment_state_due">Por pagar</string>
+    <string name="installment_state_upcoming">Próxima</string>
+    <string name="detail_rate">Tasa de interés</string>
+    <string name="detail_term">Plazo</string>
+    <string name="detail_installments">Cuotas</string>
+    <string name="detail_installment_amount">Monto por cuota</string>
+    <string name="detail_total">Total a devolver</string>
+    <string name="detail_funded_on">Fondeado el</string>
+    <string name="detail_next_due">Próximo vencimiento</string>
+    <string name="detail_lender">Prestamista</string>
+    <string name="loan_repaid_note">Pagaste este préstamo por completo.</string>
+    <string name="installment_row_a11y">Cuota %1$d de %2$d, %3$s, vence el %4$s, %5$s</string>
+    <string name="pay_cta">Pagar cuota</string>
+    <string name="pay_blocked">Este préstamo pasó a mora. Ya no se puede pagar.</string>
+</resources>

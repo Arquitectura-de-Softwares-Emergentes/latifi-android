@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="loan_details_title">Loan details</string>
+    <string name="installments_list_title">Installments</string>
+    <string name="installment_state_paid">Paid</string>
+    <string name="installment_state_received">Received</string>
+    <string name="installment_state_due">Due</string>
+    <string name="installment_state_upcoming">Upcoming</string>
+    <string name="detail_rate">Interest rate</string>
+    <string name="detail_term">Term</string>
+    <string name="detail_installments">Installments</string>
+    <string name="detail_installment_amount">Installment amount</string>
+    <string name="detail_total">Total to repay</string>
+    <string name="detail_funded_on">Funded on</string>
+    <string name="detail_next_due">Next due</string>
+    <string name="detail_lender">Lender</string>
+    <string name="loan_repaid_note">You repaid this loan in full.</string>
+    <string name="installment_row_a11y">Installment %1$d of %2$d, %3$s, due %4$s, %5$s</string>
+    <string name="pay_cta">Pay installment</string>
+    <string name="pay_blocked">This loan was marked overdue. It can no longer be paid.</string>
+</resources>
