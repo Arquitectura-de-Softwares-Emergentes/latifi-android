@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rep_title">Reputación</string>
+    <string name="rep_score">%1$d de 1000</string>
+    <string name="rep_level_new">Nuevo</string>
+    <string name="rep_level_building">En construcción</string>
+    <string name="rep_level_trusted">Confiable</string>
+    <string name="rep_level_excellent">Excelente</string>
+    <string name="rep_chip_a11y">Reputación del prestatario: %1$s, %2$d de 1000</string>
+    <string name="rep_counter_ontime">Pagadas a tiempo</string>
+    <string name="rep_counter_late">Pagadas tarde</string>
+    <string name="rep_counter_defaulted">Incumplidas</string>
+    <string name="rep_levels_title">Niveles</string>
+    <string name="rep_levels_body">Nuevo de 0 a 399. En construcción de 400 a 599. Confiable de 600 a 799. Excelente de 800 a 1000.</string>
+    <string name="rep_history_title">Historial</string>
+    <string name="rep_filter_all">Todos</string>
+    <string name="rep_filter_ontime">A tiempo</string>
+    <string name="rep_filter_late">Tardío</string>
+    <string name="rep_filter_defaulted">Incumplido</string>
+    <string name="rep_event_profile">Perfil completado</string>
+    <string name="rep_event_ontime">Pagó a tiempo</string>
+    <string name="rep_event_late">Pagó tarde</string>
+    <string name="rep_event_defaulted">Incumplió</string>
+    <plurals name="rep_event_points">
+        <item quantity="one">%1$s%2$d punto</item>
+        <item quantity="other">%1$s%2$d puntos</item>
+    </plurals>
+    <string name="rep_history_empty_title">Aún no hay historial</string>
+    <string name="rep_history_empty_body">Paga una cuota a tiempo para empezar a construir tu reputación.</string>
+    <string name="rep_no_profile">Agrega tus datos para empezar tu reputación.</string>
+    <string name="rep_asof">Actualizado %1$s</string>
+    <plurals name="counter_events">
+        <item quantity="one">%d evento</item>
+        <item quantity="other">%d eventos</item>
+    </plurals>
+    <string name="rep_add_details_cta">Agregar mis datos</string>
+    <string name="rep_score_a11y">Reputación %2$d de 1000, nivel %1$s</string>
+    <string name="rep_row_a11y">%1$s, %2$s, %3$s, %4$s</string>
+    <string name="rep_row_loan">Préstamo %1$d</string>
+    <string name="rep_row_after">Puntaje después: %1$d</string>
+</resources>
