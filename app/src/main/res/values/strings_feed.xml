@@ -11,4 +11,35 @@
     <string name="fund_card_cta">Fund</string>
     <string name="fund_card_a11y">Fund request of %1$s</string>
     <string name="open_details_a11y">Double tap to open details</string>
+    <string name="sort_label">Sort: %1$s</string>
+    <string name="sort_reputation">Reputation</string>
+    <string name="sort_rate">Rate</string>
+    <string name="sort_term">Term</string>
+    <string name="sort_recent">Newest</string>
+    <string name="filters_toggle">Filters</string>
+    <plurals name="filters_active">
+        <item quantity="one">Filters, %d active</item>
+        <item quantity="other">Filters, %d active</item>
+    </plurals>
+    <string name="group_risk">Risk</string>
+    <string name="risk_lowest">Lowest risk</string>
+    <string name="risk_low">Low risk</string>
+    <string name="risk_medium">Medium risk</string>
+    <string name="risk_help">Based on the borrower\'s reputation level.</string>
+    <string name="group_term">Term</string>
+    <plurals name="term_up_to">
+        <item quantity="one">Up to %d days</item>
+        <item quantity="other">Up to %d days</item>
+    </plurals>
+    <string name="group_amount">Amount</string>
+    <string name="amount_under">Under 100 tUSD</string>
+    <string name="amount_between">100 to 500 tUSD</string>
+    <string name="amount_over">Over 500 tUSD</string>
+    <string name="filter_clear">Clear filters</string>
+    <string name="filter_removed_a11y">Filter removed</string>
+    <string name="feed_empty_title">No open requests yet</string>
+    <string name="feed_empty_body">When a borrower posts a request, it shows up here. Check back soon.</string>
+    <string name="feed_filtered_empty_title">No requests match these filters</string>
+    <string name="feed_filtered_empty_body">Try removing a filter, or clear them all to see every open request.</string>
+    <string name="fund_own_request">This is your own request.</string>
 </resources>
