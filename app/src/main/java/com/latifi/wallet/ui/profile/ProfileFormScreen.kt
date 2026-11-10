@@ -278,7 +278,8 @@ private fun ErrorSummary(count: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .semantics { liveRegion = LiveRegionMode.Polite },
+            // Merged, so the count text and the live region sit on one node a screen reader announces.
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
