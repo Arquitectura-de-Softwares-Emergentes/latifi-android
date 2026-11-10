@@ -39,7 +39,8 @@ private val StateIconSize = 20.dp
 
 /**
  * One row per installment: its number, due date, amount with the local estimate, and the state as an
- * icon plus a word (Paid, Due, Upcoming). Each row is one merged node spoken through
+ * icon plus a word (Paid, Due, Upcoming). With [received] the paid word is Received, which is how the
+ * lender sees an installment that came in; the borrower keeps Paid. Each row is one merged node spoken through
  * `installment_row_a11y`, for example "Installment 2 of 3, 83.33 tUSD, due March 3, Due". The pieces
  * wrap, so nothing is cut at 200 percent text.
  */
@@ -49,6 +50,7 @@ fun InstallmentList(
     entries: List<InstallmentEntry>,
     localValueOf: (TokenAmount) -> LocalValue,
     modifier: Modifier = Modifier,
+    received: Boolean = false,
 ) {
     val locale = currentLocale()
     val today = rememberToday()
@@ -57,7 +59,7 @@ fun InstallmentList(
             val amount = TokenAmount(entry.amount)
             val amountText = amount.format(locale)
             val dateText = entry.dueAt?.let { DateFormat.short(it, locale, today) }.orEmpty()
-            val look = entry.state.look()
+            val look = entry.state.look(received)
             val stateText = stringResource(look.label)
             val spoken = stringResource(R.string.installment_row_a11y, entry.index, entries.size, amountText, dateText, stateText)
             FlowRow(
@@ -101,8 +103,12 @@ private fun StateLook.tint(): Color = when (tone) {
     Tint.Muted -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
-private fun InstallmentState.look(): StateLook = when (this) {
-    InstallmentState.PAID -> StateLook(R.drawable.ic_check_circle, R.string.installment_state_paid, Tint.Success)
+private fun InstallmentState.look(received: Boolean): StateLook = when (this) {
+    InstallmentState.PAID -> StateLook(
+        R.drawable.ic_check_circle,
+        if (received) R.string.installment_state_received else R.string.installment_state_paid,
+        Tint.Success,
+    )
     InstallmentState.DUE -> StateLook(R.drawable.ic_payments, R.string.installment_state_due, Tint.Link)
     InstallmentState.UPCOMING -> StateLook(R.drawable.ic_schedule, R.string.installment_state_upcoming, Tint.Muted)
 }

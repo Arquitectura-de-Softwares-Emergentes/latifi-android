@@ -7,4 +7,5 @@
     <string name="detail_history_new">New borrower: no payment history yet.</string>
     <string name="detail_terms_fixed">Rate, term and installments are fixed once you fund.</string>
     <string name="fund_cta">Fund request</string>
+    <string name="investment_details_title">Investment details</string>
 </resources>

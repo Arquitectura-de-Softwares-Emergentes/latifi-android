@@ -13,13 +13,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.latifi.wallet.ui.common.ErrorCopy
 import com.latifi.wallet.ui.common.Loadable
+import com.latifi.wallet.ui.lender.InvestmentDetailScreen
+import com.latifi.wallet.ui.lender.InvestmentDetailViewModel
 import com.latifi.wallet.ui.lender.RequestDetailScreen
 import com.latifi.wallet.ui.lender.RequestDetailViewModel
 import com.latifi.wallet.ui.profile.rememberRequireProfile
 import java.math.BigInteger
 
 /**
- * The lender screens that open above the tabs: the request details (S13) from a feed card. The
+ * The lender screens that open above the tabs: the request details (S13) from a feed card and the
+ * investment details (S16) from a Portfolio card. The
  * loan id travels as digits and the view model parses it again, so a malformed id shows the not
  * found copy. [onFund] starts the funding flow once the profile gate passes. The funding screen is
  * registered by plan 05-12, which passes its navigation here. Until then it does nothing, because a
@@ -33,6 +36,21 @@ fun NavGraphBuilder.lenderGraph(
         Routes.REQUEST_DETAIL,
         arguments = listOf(navArgument(RouteArgs.LOAN_ID) { type = NavType.StringType }),
     ) { RequestDetailRoute(navController, onFund) }
+    composable(
+        Routes.INVESTMENT_DETAIL,
+        arguments = listOf(navArgument(RouteArgs.LOAN_ID) { type = NavType.StringType }),
+    ) { InvestmentDetailRoute(navController) }
+}
+
+@Composable
+private fun InvestmentDetailRoute(navController: NavHostController) {
+    val viewModel: InvestmentDetailViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    InvestmentDetailScreen(
+        state = state,
+        onReload = viewModel::reload,
+        onBack = { navController.popBackStack() },
+    )
 }
 
 @Composable

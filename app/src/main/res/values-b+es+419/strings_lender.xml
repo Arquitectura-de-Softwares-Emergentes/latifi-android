@@ -7,4 +7,5 @@
     <string name="detail_history_new">Prestatario nuevo: aún no tiene historial de pagos.</string>
     <string name="detail_terms_fixed">La tasa, el plazo y las cuotas quedan fijos cuando fondeas.</string>
     <string name="fund_cta">Fondear solicitud</string>
+    <string name="investment_details_title">Detalle de la inversión</string>
 </resources>
