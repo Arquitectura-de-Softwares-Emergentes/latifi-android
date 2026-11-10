@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.latifi.wallet.domain.model.AppRole
 import com.latifi.wallet.ui.components.ScreenScaffold
+import com.latifi.wallet.ui.home.HomeRoute
 import com.latifi.wallet.ui.loans.LoansRoute
 import com.latifi.wallet.ui.profile.ProfileRoute
 
@@ -44,7 +45,7 @@ internal fun MainTabs(role: AppRole, rootController: NavHostController) {
     ) {
         NavHost(navController = tabController, startDestination = Routes.HOME) {
             // Each feature plan replaces the placeholder of its tab with the real screen.
-            composable(Routes.HOME) { TabPlaceholder(TabDestination.Home) }
+            composable(Routes.HOME) { HomeRoute() }
             composable(Routes.LOANS) { LoansRoute(rootController) }
             composable(Routes.REPUTATION) { TabPlaceholder(TabDestination.Reputation) }
             composable(Routes.INVEST) { TabPlaceholder(TabDestination.Invest) }
