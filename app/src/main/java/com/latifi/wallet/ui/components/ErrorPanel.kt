@@ -45,7 +45,8 @@ fun ErrorPanel(kind: ErrorKind, onReload: () -> Unit, modifier: Modifier = Modif
 /**
  * An empty list: a title, one sentence on what to do and a button that does it. Used for "no
  * data yet" and for "no data under this filter", each with its own copy and action. An empty
- * state with nothing to do leaves [actionLabel] and [onAction] out and shows no button.
+ * state with nothing to do leaves [actionLabel] and [onAction] out and shows no button. The action
+ * is secondary unless [primaryAction] is set, for the screen whose one main action it is.
  */
 @Composable
 fun EmptyPanel(
@@ -54,6 +55,7 @@ fun EmptyPanel(
     modifier: Modifier = Modifier,
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null,
+    primaryAction: Boolean = false,
 ) {
     StatePanel(
         iconRes = R.drawable.ic_info,
@@ -63,6 +65,7 @@ fun EmptyPanel(
         actionLabel = actionLabel,
         onAction = onAction,
         modifier = modifier,
+        primaryAction = primaryAction,
     )
 }
 
@@ -75,6 +78,7 @@ private fun StatePanel(
     actionLabel: String?,
     onAction: (() -> Unit)?,
     modifier: Modifier,
+    primaryAction: Boolean = false,
 ) {
     Column(
         modifier = modifier.fillMaxWidth().padding(Spacing.xl),
@@ -97,7 +101,11 @@ private fun StatePanel(
         }
         Text(text = body, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
         if (actionLabel != null && onAction != null) {
-            SecondaryButton(text = actionLabel, onClick = onAction, fillMaxWidth = false)
+            if (primaryAction) {
+                PrimaryButton(text = actionLabel, onClick = onAction, fillMaxWidth = false)
+            } else {
+                SecondaryButton(text = actionLabel, onClick = onAction, fillMaxWidth = false)
+            }
         }
     }
 }

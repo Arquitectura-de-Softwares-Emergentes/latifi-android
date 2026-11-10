@@ -125,6 +125,8 @@ fun RequestCard(
                 text = stringResource(R.string.fund_card_cta),
                 onClick = onFund,
                 modifier = Modifier.padding(start = Spacing.lg, end = Spacing.lg, bottom = Spacing.lg),
+                enabled = !model.isOwn,
+                disabledReason = if (model.isOwn) stringResource(R.string.fund_own_request) else null,
                 spokenLabel = stringResource(R.string.fund_card_a11y, amountText),
             )
         }
