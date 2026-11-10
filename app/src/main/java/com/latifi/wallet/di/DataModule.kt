@@ -12,9 +12,12 @@ import com.latifi.wallet.data.prefs.DataStorePrefsStore
 import com.latifi.wallet.data.prefs.PREFS_FILE_NAME
 import com.latifi.wallet.data.session.InMemorySessionStore
 import com.latifi.wallet.domain.auth.AuthRepository
+import com.latifi.wallet.domain.auth.DefaultReauthCoordinator
+import com.latifi.wallet.domain.auth.ReauthCoordinator
 import com.latifi.wallet.domain.prefs.PrefsStore
 import com.latifi.wallet.domain.session.SessionStore
 import com.latifi.wallet.domain.wallet.WalletGateway
+import com.latifi.wallet.ui.overlay.OverlayController
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -58,4 +61,9 @@ object DataModule {
     @Singleton
     fun providePrefsStore(@ApplicationContext context: Context): PrefsStore =
         DataStorePrefsStore(context.prefsDataStore)
+
+    @Provides
+    @Singleton
+    fun provideReauthCoordinator(overlays: OverlayController): ReauthCoordinator =
+        DefaultReauthCoordinator(overlays)
 }
