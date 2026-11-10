@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.latifi.wallet.domain.auth.ReauthCoordinator
+import com.latifi.wallet.ui.coins.CoinsSheet
 import com.latifi.wallet.ui.connect.WalletHelpSheet
 import com.latifi.wallet.ui.nav.Overlays
 import com.latifi.wallet.ui.signin.SignInSheetHost
@@ -24,6 +25,7 @@ fun OverlayHost(controller: OverlayController, reauth: ReauthCoordinator) {
         Overlays.SIGN_IN -> SignInOverlay(reauth)
         Overlays.WALLET_HELP -> WalletHelpSheet(onClose = { controller.dismiss(Overlays.WALLET_HELP) })
         Overlays.TX_STATUS -> TxStatusOverlay()
+        Overlays.COINS -> CoinsSheet()
         else -> Unit
     }
 }

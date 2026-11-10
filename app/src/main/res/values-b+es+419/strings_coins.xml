@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="coins_title">Obtener monedas de prueba</string>
+    <string name="coins_body">Recibe 1,000 tUSD, dólares de prueba gratis, para probar LatiFi. No tienen valor real. Cada billetera puede recibir hasta 10,000 tUSD en total.</string>
+    <string name="coins_confirm">Obtener 1,000 tUSD</string>
+    <string name="coins_view_balance">Ver mi saldo</string>
+</resources>

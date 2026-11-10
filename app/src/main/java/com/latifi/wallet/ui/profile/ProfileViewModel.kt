@@ -16,6 +16,8 @@ import com.latifi.wallet.domain.profile.ProfileRepository
 import com.latifi.wallet.domain.session.SessionStore
 import com.latifi.wallet.domain.session.SignOutUseCase
 import com.latifi.wallet.ui.components.RATES_PROVIDER_URL
+import com.latifi.wallet.ui.nav.Overlays
+import com.latifi.wallet.ui.overlay.OverlayController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +48,9 @@ sealed interface ProfileEvent {
     data object EditDetails : ProfileEvent
 
     data object CopyAddress : ProfileEvent
+
+    /** The Get test coins row: opens the coins sheet. */
+    data object GetCoins : ProfileEvent
 
     data object SwitchRole : ProfileEvent
 
@@ -98,6 +103,7 @@ class ProfileViewModel @Inject constructor(
     private val languages: LanguageController,
     private val signOut: SignOutUseCase,
     private val config: AppConfig,
+    private val overlays: OverlayController = OverlayController(),
 ) : ViewModel() {
     private var address: String? = null
 
@@ -138,6 +144,7 @@ class ProfileViewModel @Inject constructor(
     fun onEvent(event: ProfileEvent) {
         when (event) {
             ProfileEvent.EditDetails -> effects.trySend(ProfileEffect.OpenForm)
+            ProfileEvent.GetCoins -> overlays.show(Overlays.COINS)
             ProfileEvent.CopyAddress -> address?.let { full ->
                 effects.trySend(ProfileEffect.CopyToClipboard(full))
                 announce(ProfileMessage.AddressCopied)
