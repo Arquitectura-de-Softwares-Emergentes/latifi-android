@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- S05 Profile form -->
+    <string name="profile_gate_title">Primero agrega tus datos</string>
+    <string name="profile_gate_body_borrow">Los prestamistas necesitan saber a quién le prestan antes de fondear. Agrega tu nombre y un medio de contacto.</string>
+    <string name="profile_gate_body_lend">Los prestatarios ven quién fondea su solicitud. Agrega tu nombre y un medio de contacto.</string>
+    <string name="profile_title">Tus datos</string>
+    <string name="field_name">Nombre completo</string>
+    <string name="field_name_help">Se muestra a la otra persona del préstamo.</string>
+    <string name="field_contact_type">Tipo de contacto</string>
+    <string name="contact_email">Correo electrónico</string>
+    <string name="contact_phone">Teléfono</string>
+    <string name="field_contact_email">Correo electrónico</string>
+    <string name="field_contact_phone">Número de teléfono</string>
+    <string name="contact_privacy">Solo tú ves tu contacto. Las demás personas ven solo tu nombre.</string>
+    <string name="err_name_required">Escribe tu nombre.</string>
+    <string name="err_name_long">Usa 80 caracteres o menos.</string>
+    <string name="err_contact_email">Escribe un correo válido, como nombre@ejemplo.com.</string>
+    <string name="err_contact_phone">Escribe un teléfono válido con el código de país.</string>
+    <plurals name="profile_errors_count">
+        <item quantity="one">1 campo necesita tu atención.</item>
+        <item quantity="other">%d campos necesitan tu atención.</item>
+    </plurals>
+    <string name="profile_save">Guardar datos</string>
+    <string name="profile_saved">Datos guardados</string>
+    <string name="profile_save_error">No pudimos guardar tus datos. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="welcome_back">Hola de nuevo, %1$s</string>
+</resources>

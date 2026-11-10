@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- S05 Profile form -->
+    <string name="profile_gate_title">Add your details first</string>
+    <string name="profile_gate_body_borrow">Lenders need to know who they are lending to before they fund a request. Add your name and a way to reach you.</string>
+    <string name="profile_gate_body_lend">Borrowers see who funds their request. Add your name and a way to reach you.</string>
+    <string name="profile_title">Your details</string>
+    <string name="field_name">Full name</string>
+    <string name="field_name_help">Shown to the other person in a loan.</string>
+    <string name="field_contact_type">Contact type</string>
+    <string name="contact_email">Email</string>
+    <string name="contact_phone">Phone</string>
+    <string name="field_contact_email">Email address</string>
+    <string name="field_contact_phone">Phone number</string>
+    <string name="contact_privacy">Only you can see your contact. Other people see your name only.</string>
+    <string name="err_name_required">Enter your name.</string>
+    <string name="err_name_long">Use 80 characters or fewer.</string>
+    <string name="err_contact_email">Enter a valid email, like name@example.com.</string>
+    <string name="err_contact_phone">Enter a valid phone number with the country code.</string>
+    <plurals name="profile_errors_count">
+        <item quantity="one">1 field needs your attention.</item>
+        <item quantity="other">%d fields need your attention.</item>
+    </plurals>
+    <string name="profile_save">Save details</string>
+    <string name="profile_saved">Details saved</string>
+    <string name="profile_save_error">We could not save your details. Check your connection and try again.</string>
+    <string name="welcome_back">Hello again, %1$s</string>
+</resources>
