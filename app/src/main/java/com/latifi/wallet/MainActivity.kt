@@ -14,9 +14,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.latifi.wallet.core.AppConfig
+import com.latifi.wallet.ui.theme.LatiFiTheme
+import com.latifi.wallet.ui.theme.Spacing
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -29,24 +32,32 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
+            LatiFiTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    Launch(walletConfigured = config.isWalletConfigured)
+                    LaunchContent(walletConfigured = config.isWalletConfigured)
                 }
             }
         }
     }
 }
 
+/** Tracer content, kept internal so the theme smoke test can compose it under both themes. */
 @Composable
-private fun Launch(walletConfigured: Boolean) {
+internal fun LaunchContent(walletConfigured: Boolean) {
     Column(
-        modifier = Modifier.safeDrawingPadding().padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.safeDrawingPadding().padding(Spacing.xl),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        Text(text = stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = stringResource(R.string.app_name),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.semantics { heading() },
+        )
         if (!walletConfigured) {
-            Text(text = stringResource(R.string.wallet_not_configured))
+            Text(
+                text = stringResource(R.string.wallet_not_configured),
+                style = MaterialTheme.typography.bodyLarge,
+            )
         }
     }
 }
