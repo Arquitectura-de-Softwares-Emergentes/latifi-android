@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="action_next">Siguiente</string>
     <string name="action_back">Atrás</string>
+    <string name="retry_reload">Recargar esta pantalla</string>
+    <string name="label_required">Obligatorio</string>
+    <string name="step_of">Paso %1$d de %2$d</string>
+    <string name="test_money_notice">Esto es una demostración. Los tUSD son dólares de prueba sin valor real.</string>
+    <string name="loading_generic">Cargando</string>
     <string name="menu_open">Menú</string>
+    <string name="refresh">Actualizar</string>
+    <string name="load_more">Cargar más</string>
+    <string name="refresh_failed">No se pudo actualizar. Mostramos lo que teníamos.</string>
+    <string name="err_offline_title">Sin conexión a internet</string>
+    <string name="err_offline_body">Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="err_server_title">Algo salió mal de nuestro lado</string>
+    <string name="err_server_body">Inténtalo de nuevo en un momento. No cambió nada en tu billetera.</string>
+    <string name="err_rate_limit">Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.</string>
+    <string name="err_not_found">No encontramos este elemento. Puede que ya no esté disponible.</string>
 </resources>

@@ -93,13 +93,13 @@ private fun ScreenTopBar(title: String, onBack: (() -> Unit)?) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             when {
-                onBack != null -> IconButton(onClick = onBack, modifier = Modifier.size(MinTouchTarget)) {
+                onBack != null -> IconButton(onClick = onBack, modifier = Modifier.size(MinTouchTarget).latifiFocusRing()) {
                     Icon(
                         painter = painterResource(R.drawable.ic_arrow_back),
                         contentDescription = stringResource(R.string.action_back),
                     )
                 }
-                menuAction != null -> IconButton(onClick = menuAction, modifier = Modifier.size(MinTouchTarget)) {
+                menuAction != null -> IconButton(onClick = menuAction, modifier = Modifier.size(MinTouchTarget).latifiFocusRing()) {
                     Icon(
                         painter = painterResource(R.drawable.ic_menu),
                         contentDescription = stringResource(R.string.menu_open),
