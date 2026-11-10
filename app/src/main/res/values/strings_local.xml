@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="local_estimate">≈ %1$s</string>
+    <string name="local_note">Local values are estimates.</string>
+    <string name="local_stale">Rate from %1$s. It may be out of date.</string>
+    <string name="local_unavailable">Local value unavailable</string>
+</resources>
