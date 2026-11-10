@@ -123,7 +123,7 @@ private fun ScreenTopBar(title: String, onBack: (() -> Unit)?) {
 }
 
 @Composable
-private fun PinnedActionBar(content: @Composable () -> Unit) {
+internal fun PinnedActionBar(content: @Composable () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.background,

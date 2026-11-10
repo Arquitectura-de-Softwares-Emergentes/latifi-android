@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.latifi.wallet.core.AppConfig
+import com.latifi.wallet.domain.auth.ReauthCoordinator
 import com.latifi.wallet.ui.nav.LatiFiNavHost
 import com.latifi.wallet.ui.overlay.OverlayController
 import com.latifi.wallet.ui.overlay.OverlayHost
@@ -25,6 +26,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var overlayController: OverlayController
 
+    @Inject
+    lateinit var reauthCoordinator: ReauthCoordinator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -32,7 +36,7 @@ class MainActivity : AppCompatActivity() {
             LatiFiTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
                     LatiFiNavHost(navController = rememberNavController())
-                    OverlayHost(controller = overlayController)
+                    OverlayHost(controller = overlayController, reauth = reauthCoordinator)
                 }
             }
         }
