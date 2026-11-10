@@ -22,8 +22,10 @@ import com.latifi.wallet.ui.components.ScreenScaffold
  * destinations are the six tabs, so each tab keeps its own back stack and scroll state while
  * the adaptive scaffold around it shows the four tabs of [role].
  */
-fun NavGraphBuilder.mainTabsGraph(role: AppRole) {
-    composable(Routes.MAIN) { MainTabs(role) }
+fun NavGraphBuilder.mainTabsGraph(role: () -> AppRole) {
+    // [role] is read inside the destination, so a role change recomposes the tabs without
+    // rebuilding the graph.
+    composable(Routes.MAIN) { MainTabs(role()) }
 }
 
 @Composable

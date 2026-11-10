@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onb1_title">Pide un préstamo</string>
+    <string name="onb1_body">Elige cuánto necesitas, por cuántos días y en cuántas cuotas. Los prestamistas verán tu solicitud y tu reputación.</string>
+    <string name="onb1_wallet_note">Todo en LatiFi lo haces con una billetera: una app gratuita en tu teléfono que guarda tu dinero digital y te pide aprobar cada acción. Conectarás una al final.</string>
+    <string name="onb2_title">Invierte en personas de confianza</string>
+    <string name="onb2_body">Revisa las solicitudes abiertas. Cada una muestra la reputación, la tasa y el plazo, para que decidas antes de prestar.</string>
+    <string name="onb3_title">Paga en cuotas</string>
+    <string name="onb3_body">Ves el total a devolver antes de aceptar. Paga cada cuota en su fecha, desde tu propia billetera.</string>
+    <string name="onb4_title">Construye tu reputación</string>
+    <string name="onb4_body">Cada cuota pagada a tiempo sube tu reputación. Una reputación más alta ayuda a que los prestamistas confíen en tu próxima solicitud.</string>
+    <string name="onb_nocustody">LatiFi nunca guarda tu dinero ni el código secreto que abre tu billetera. Tú apruebas cada acción en tu propia billetera.</string>
+    <string name="onb_finish_help">Volver a Perfil</string>
+</resources>
