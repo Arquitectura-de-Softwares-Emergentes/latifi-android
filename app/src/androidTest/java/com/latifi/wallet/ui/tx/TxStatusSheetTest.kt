@@ -2,10 +2,13 @@ package com.latifi.wallet.ui.tx
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -69,6 +72,18 @@ class TxStatusSheetTest {
 
     private val isLiveRegion = SemanticsMatcher.keyIsDefined(SemanticsProperties.LiveRegion)
 
+    /**
+     * The v2 rule starts every test in touch mode, and in touch mode a button cannot hold input
+     * focus. A person with a keyboard or a D-pad is in keyboard mode, so the content runs in it.
+     */
+    private fun setSheetContent(content: @Composable () -> Unit) {
+        rule.setContent {
+            val input = LocalInputModeManager.current
+            SideEffect { input.requestInputMode(InputMode.Keyboard) }
+            content()
+        }
+    }
+
     private fun uiOf(
         state: TxState,
         walletAddress: String? = address,
@@ -82,7 +97,7 @@ class TxStatusSheetTest {
         checks: Boolean = true,
     ) {
         if (checks) rule.enableAccessibilityChecks()
-        rule.setContent {
+        setSheetContent {
             LatiFiTheme(darkTheme = darkTheme) {
                 val content = @Composable {
                     TxStatusSheetContent(ui = ui, onEvent = { events += it })
@@ -268,7 +283,7 @@ class TxStatusSheetTest {
             TxState.Confirmed(hash, null), TxState.Failed(FailReason.Network),
         )
         var current by mutableStateOf(states.first())
-        rule.setContent {
+        setSheetContent {
             LatiFiTheme(darkTheme = false) { TxStatusSheetContent(ui = uiOf(current), onEvent = {}) }
         }
         for (state in states) {
@@ -281,7 +296,7 @@ class TxStatusSheetTest {
     @Test
     fun failedAnnouncesAssertivelyAndEveryOtherStatePolitely() {
         var current by mutableStateOf<TxState>(TxState.Pending(0))
-        rule.setContent {
+        setSheetContent {
             LatiFiTheme(darkTheme = false) { TxStatusSheetContent(ui = uiOf(current), onEvent = {}) }
         }
         for (state in listOf(TxState.PendingTimeout, TxState.Confirming(hash), TxState.Confirmed(hash, null))) {
@@ -297,7 +312,7 @@ class TxStatusSheetTest {
 
     @Test
     fun theCopiedNoticeIsAPoliteAnnouncement() {
-        rule.setContent {
+        setSheetContent {
             LatiFiTheme(darkTheme = false) {
                 TxStatusSheetContent(
                     ui = uiOf(TxState.Confirmed(hash, null)),
@@ -321,7 +336,7 @@ class TxStatusSheetTest {
     @Test
     fun theFocusMovesToTheNewPrimaryAfterEachStateChange() {
         var current by mutableStateOf<TxState>(TxState.Pending(0))
-        rule.setContent {
+        setSheetContent {
             LatiFiTheme(darkTheme = false) { TxStatusSheetContent(ui = uiOf(current), onEvent = {}) }
         }
         rule.waitForIdle()
@@ -393,7 +408,7 @@ class TxStatusSheetTest {
     // ---- the sheet around the content ----
 
     private fun showHost(state: TxState) {
-        rule.setContent {
+        setSheetContent {
             LatiFiTheme(darkTheme = false) {
                 TxStatusSheetHost(ui = uiOf(state), onEvent = { events += it })
             }
