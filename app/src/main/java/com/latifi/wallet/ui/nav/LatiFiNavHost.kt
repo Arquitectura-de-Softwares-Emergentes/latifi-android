@@ -37,6 +37,7 @@ fun LatiFiNavHost(
         profileGraph(navController)
         mainTabsGraph(navController) { roleState.value }
         loansGraph(navController)
+        lenderGraph(navController)
         extraGraphs()
     }
 }

@@ -50,7 +50,13 @@ internal fun MainTabs(role: AppRole, rootController: NavHostController) {
             composable(Routes.HOME) { HomeRoute(onBrowse = { tabController.selectTab(TabDestination.Invest) }) }
             composable(Routes.LOANS) { LoansRoute(rootController) }
             composable(Routes.REPUTATION) { ReputationRoute(rootController) }
-            composable(Routes.INVEST) { FeedRoute() }
+            composable(Routes.INVEST) {
+                FeedRoute(
+                    onOpen = { loanId -> rootController.navigate(Routes.requestDetail(loanId)) },
+                    // The funding flow is registered by plan 05-12. Until then the card button does nothing.
+                    onFund = {},
+                )
+            }
             composable(Routes.PORTFOLIO) { TabPlaceholder(TabDestination.Portfolio) }
             composable(Routes.PROFILE) { ProfileRoute(rootController) }
         }

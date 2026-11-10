@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="detail_request_title">Request details</string>
+    <string name="detail_earn">You would earn</string>
+    <string name="detail_borrower">Borrower</string>
+    <string name="detail_history_title">Recent payment history</string>
+    <string name="detail_history_new">New borrower: no payment history yet.</string>
+    <string name="detail_terms_fixed">Rate, term and installments are fixed once you fund.</string>
+    <string name="fund_cta">Fund request</string>
+</resources>
