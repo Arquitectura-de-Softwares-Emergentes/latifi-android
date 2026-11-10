@@ -27,12 +27,18 @@ fun SemanticsNodeInteractionsProvider.assertNoTruncatedText() {
         if (action != null) {
             val results = mutableListOf<TextLayoutResult>()
             action.invoke(results)
-            results.forEach {
+            results.forEach { layout ->
+                // hasVisualOverflow also reports a short single line in a wider box, so the check
+                // looks at what truncation really is: lines cut by a height limit or an ellipsis,
+                // and a line that is wider than the space it was given.
+                val maxWidth = layout.layoutInput.constraints.maxWidth
+                val cut = layout.didOverflowHeight || (0 until layout.lineCount).any { line ->
+                    layout.isLineEllipsized(line) || layout.getLineRight(line) > maxWidth + 1f
+                }
                 assertFalse(
-                    "text is truncated: \"${it.layoutInput.text.text}\" width=${it.didOverflowWidth} " +
-                        "height=${it.didOverflowHeight} size=${it.size} lines=${it.lineCount} " +
-                        "constraints=${it.layoutInput.constraints}",
-                    it.hasVisualOverflow,
+                    "text is truncated: \"${layout.layoutInput.text.text}\" height=${layout.didOverflowHeight} " +
+                        "size=${layout.size} lines=${layout.lineCount} constraints=${layout.layoutInput.constraints}",
+                    cut,
                 )
             }
         }
