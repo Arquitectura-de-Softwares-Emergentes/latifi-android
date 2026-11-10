@@ -4,4 +4,5 @@
     <string name="local_note">Los valores locales son estimaciones.</string>
     <string name="local_stale">Tasa de %1$s. Puede estar desactualizada.</string>
     <string name="local_unavailable">Valor local no disponible</string>
+    <string name="local_about_a11y">aproximadamente %1$s</string>
 </resources>

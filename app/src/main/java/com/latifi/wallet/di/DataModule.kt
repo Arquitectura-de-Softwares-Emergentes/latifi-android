@@ -7,9 +7,11 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.latifi.wallet.core.AppConfig
 import com.latifi.wallet.core.AppMode
 import com.latifi.wallet.data.fake.FakeAuthRepository
+import com.latifi.wallet.data.fake.FakeChainReadRepository
 import com.latifi.wallet.data.fake.FakeExchangeRateRepository
 import com.latifi.wallet.data.fake.FakeLoanRepository
 import com.latifi.wallet.data.fake.FakeProfileRepository
+import com.latifi.wallet.data.fake.FakeReputationRepository
 import com.latifi.wallet.data.fake.FakeWalletGateway
 import com.latifi.wallet.data.language.AppCompatLanguageController
 import com.latifi.wallet.data.prefs.DataStorePrefsStore
@@ -18,10 +20,12 @@ import com.latifi.wallet.data.session.InMemorySessionStore
 import com.latifi.wallet.domain.auth.AuthRepository
 import com.latifi.wallet.domain.auth.DefaultReauthCoordinator
 import com.latifi.wallet.domain.auth.ReauthCoordinator
+import com.latifi.wallet.domain.chain.ChainReadRepository
 import com.latifi.wallet.domain.language.LanguageController
 import com.latifi.wallet.domain.loan.LoanRepository
 import com.latifi.wallet.domain.prefs.PrefsStore
 import com.latifi.wallet.domain.profile.ProfileRepository
+import com.latifi.wallet.domain.reputation.ReputationRepository
 import com.latifi.wallet.domain.rates.ExchangeRateRepository
 import com.latifi.wallet.domain.session.SessionStore
 import com.latifi.wallet.domain.session.SignOutHook
@@ -89,6 +93,21 @@ abstract class DataModule {
         fun provideLoanRepository(config: AppConfig, clock: Clock): LoanRepository = when (config.mode) {
             AppMode.Demo -> FakeLoanRepository(clock)
             AppMode.Live -> error("The live loan repository is added by plan 05-13. Build without a project id to use demo mode.")
+        }
+
+        @Provides
+        @Singleton
+        fun provideChainReadRepository(config: AppConfig, loans: LoanRepository): ChainReadRepository = when (config.mode) {
+            // The fake follows the loans the fake API serves, so the next installment matches the loan list.
+            AppMode.Demo -> FakeChainReadRepository(loans = { (loans as? FakeLoanRepository)?.loans.orEmpty() })
+            AppMode.Live -> error("The live chain reads are added by plan 05-11. Build without a project id to use demo mode.")
+        }
+
+        @Provides
+        @Singleton
+        fun provideReputationRepository(config: AppConfig, clock: Clock): ReputationRepository = when (config.mode) {
+            AppMode.Demo -> FakeReputationRepository(clock)
+            AppMode.Live -> error("The live reputation repository is added by plan 05-13. Build without a project id to use demo mode.")
         }
 
         @Provides

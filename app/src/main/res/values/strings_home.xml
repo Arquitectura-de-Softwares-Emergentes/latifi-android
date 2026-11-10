@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_balance">Your balance</string>
+    <string name="home_zero_balance">You have no tUSD yet. Get test coins to try LatiFi.</string>
+    <string name="home_next_installment">Next installment</string>
+    <string name="home_no_installment">You have no installment due.</string>
+    <string name="home_open_requests">Open requests</string>
+    <string name="home_next_payment_in">Next payment you receive</string>
+    <string name="home_no_payment_in">No payments expected yet.</string>
+    <string name="home_browse">Browse requests</string>
+    <string name="home_fee_low">Your wallet is low on network fee funds. Ask the LatiFi team to top it up.</string>
+    <string name="coins_cta">Get test coins</string>
+</resources>

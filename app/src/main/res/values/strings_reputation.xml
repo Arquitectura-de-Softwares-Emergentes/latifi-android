@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rep_title">Reputation</string>
+    <string name="rep_score">%1$d of 1000</string>
+    <string name="rep_level_new">New</string>
+    <string name="rep_level_building">Building</string>
+    <string name="rep_level_trusted">Trusted</string>
+    <string name="rep_level_excellent">Excellent</string>
+    <string name="rep_chip_a11y">Borrower reputation: %1$s, %2$d of 1000</string>
+    <string name="rep_counter_ontime">Paid on time</string>
+    <string name="rep_counter_late">Paid late</string>
+    <string name="rep_counter_defaulted">Defaulted</string>
+    <string name="rep_levels_title">Levels</string>
+    <string name="rep_levels_body">New 0 to 399. Building 400 to 599. Trusted 600 to 799. Excellent 800 to 1000.</string>
+    <string name="rep_history_title">History</string>
+    <string name="rep_filter_all">All</string>
+    <string name="rep_filter_ontime">On time</string>
+    <string name="rep_filter_late">Late</string>
+    <string name="rep_filter_defaulted">Defaulted</string>
+    <string name="rep_event_profile">Profile completed</string>
+    <string name="rep_event_ontime">Paid on time</string>
+    <string name="rep_event_late">Paid late</string>
+    <string name="rep_event_defaulted">Defaulted</string>
+    <plurals name="rep_event_points">
+        <item quantity="one">%1$s%2$d point</item>
+        <item quantity="other">%1$s%2$d points</item>
+    </plurals>
+    <string name="rep_history_empty_title">No history yet</string>
+    <string name="rep_history_empty_body">Pay an installment on time to start building your reputation.</string>
+    <string name="rep_no_profile">Add your details to start your reputation.</string>
+    <string name="rep_asof">Updated %1$s</string>
+    <plurals name="counter_events">
+        <item quantity="one">%d event</item>
+        <item quantity="other">%d events</item>
+    </plurals>
+    <string name="rep_add_details_cta">Add my details</string>
+    <string name="rep_score_a11y">Reputation %2$d of 1000, level %1$s</string>
+    <string name="rep_row_a11y">%1$s, %2$s, %3$s, %4$s</string>
+    <string name="rep_row_loan">Loan %1$d</string>
+    <string name="rep_row_after">Score after: %1$d</string>
+</resources>
