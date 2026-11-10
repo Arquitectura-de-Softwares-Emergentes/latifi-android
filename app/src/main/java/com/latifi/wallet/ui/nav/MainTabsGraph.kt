@@ -19,6 +19,7 @@ import com.latifi.wallet.ui.components.ScreenScaffold
 import com.latifi.wallet.ui.home.HomeRoute
 import com.latifi.wallet.ui.loans.LoansRoute
 import com.latifi.wallet.ui.profile.ProfileRoute
+import com.latifi.wallet.ui.reputation.ReputationRoute
 
 /**
  * Registers the tab container at [Routes.MAIN]. The container owns a nested NavHost whose
@@ -47,7 +48,7 @@ internal fun MainTabs(role: AppRole, rootController: NavHostController) {
             // Each feature plan replaces the placeholder of its tab with the real screen.
             composable(Routes.HOME) { HomeRoute(onBrowse = { tabController.selectTab(TabDestination.Invest) }) }
             composable(Routes.LOANS) { LoansRoute(rootController) }
-            composable(Routes.REPUTATION) { TabPlaceholder(TabDestination.Reputation) }
+            composable(Routes.REPUTATION) { ReputationRoute(rootController) }
             composable(Routes.INVEST) { TabPlaceholder(TabDestination.Invest) }
             composable(Routes.PORTFOLIO) { TabPlaceholder(TabDestination.Portfolio) }
             composable(Routes.PROFILE) { ProfileRoute(rootController) }

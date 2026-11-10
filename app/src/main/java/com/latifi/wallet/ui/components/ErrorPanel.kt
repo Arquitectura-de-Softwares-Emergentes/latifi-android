@@ -44,15 +44,16 @@ fun ErrorPanel(kind: ErrorKind, onReload: () -> Unit, modifier: Modifier = Modif
 
 /**
  * An empty list: a title, one sentence on what to do and a button that does it. Used for "no
- * data yet" and for "no data under this filter", each with its own copy and action.
+ * data yet" and for "no data under this filter", each with its own copy and action. An empty
+ * state with nothing to do leaves [actionLabel] and [onAction] out and shows no button.
  */
 @Composable
 fun EmptyPanel(
     title: String,
     body: String,
-    actionLabel: String,
-    onAction: () -> Unit,
     modifier: Modifier = Modifier,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null,
 ) {
     StatePanel(
         iconRes = R.drawable.ic_info,
@@ -71,8 +72,8 @@ private fun StatePanel(
     iconTint: androidx.compose.ui.graphics.Color,
     title: String?,
     body: String,
-    actionLabel: String,
-    onAction: () -> Unit,
+    actionLabel: String?,
+    onAction: (() -> Unit)?,
     modifier: Modifier,
 ) {
     Column(
@@ -95,6 +96,8 @@ private fun StatePanel(
             )
         }
         Text(text = body, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
-        SecondaryButton(text = actionLabel, onClick = onAction, fillMaxWidth = false)
+        if (actionLabel != null && onAction != null) {
+            SecondaryButton(text = actionLabel, onClick = onAction, fillMaxWidth = false)
+        }
     }
 }
