@@ -89,4 +89,17 @@ class HexTest {
         assertEquals("0xccb8...3266", Hex.shortAddress("0xccb8ad15a4954138c987a77924ceab468a843266"))
         assertEquals("not an address", Hex.shortAddress("not an address"))
     }
+
+    @Test
+    fun shortReferenceKeepsSixLeadingAndFourTrailingCharacters() {
+        val hash = "0x12ab" + "00".repeat(28) + "9F3C"
+        assertEquals("0x12ab...9f3c", Hex.shortReference(hash))
+    }
+
+    @Test
+    fun shortReferenceLeavesTextThatIsNotAReferenceUnchanged() {
+        assertEquals("0x1234", Hex.shortReference("0x1234"))
+        val address = "0x52908400098527886E0F7030069857D2E4169EE7"
+        assertEquals(address, Hex.shortReference(address))
+    }
 }
