@@ -65,4 +65,14 @@ object Hex {
         val lower = address.lowercase()
         return lower.take(6) + "..." + lower.takeLast(4)
     }
+
+    /**
+     * `0x12ab...9f3c`: the short form of a transaction reference, the first 6 characters, three dots
+     * and the last 4. Text that is not a 64 digit reference is returned unchanged.
+     */
+    fun shortReference(hash: String): String {
+        if (!isTxHash(hash)) return hash
+        val lower = hash.lowercase()
+        return lower.take(6) + "..." + lower.takeLast(4)
+    }
 }

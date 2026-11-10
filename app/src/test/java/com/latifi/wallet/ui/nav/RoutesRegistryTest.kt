@@ -145,7 +145,7 @@ class RoutesRegistryTest {
         )
 
         /** Overlays whose sheet is not built yet. Remove a name in the plan that registers it. */
-        val PENDING_OVERLAYS = setOf("TX_STATUS", "COINS")
+        val PENDING_OVERLAYS = setOf("COINS")
 
         fun findings(scan: Scan, pendingRoutes: Set<String>, pendingOverlays: Set<String>): List<String> {
             val found = mutableListOf<String>()

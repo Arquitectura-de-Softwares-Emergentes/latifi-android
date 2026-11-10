@@ -42,6 +42,8 @@ class FakeWalletGateway(
     var script: FakeWalletScript = FakeWalletScript.AutoApprove(),
     var connectDelayMillis: Long = 600,
     val demoAddress: String = DEMO_ADDRESS,
+    /** The transaction hash a sent transaction gets, by request id. A test makes each one unique. */
+    var txHashOf: (requestId: Long) -> String = { FAKE_TX_HASH },
 ) : WalletGateway {
     private val mutableState = MutableStateFlow(initialState)
     private val mutableResponses = MutableSharedFlow<WalletResponse>(extraBufferCapacity = 64)
@@ -71,7 +73,7 @@ class FakeWalletGateway(
         val id = nextRequestId++
         sentRequests += id to request
         when (val current = script) {
-            is FakeWalletScript.AutoApprove -> answer(id, current.delayMillis, approved(request))
+            is FakeWalletScript.AutoApprove -> answer(id, current.delayMillis, approved(id, request))
             is FakeWalletScript.Reject -> answer(id, current.delayMillis, WalletOutcome.Rejected)
             is FakeWalletScript.SessionLost -> answer(id, current.delayMillis, WalletOutcome.SessionLost)
             FakeWalletScript.NeverAnswer -> Unit
@@ -104,9 +106,9 @@ class FakeWalletGateway(
         }
     }
 
-    private fun approved(request: WalletRequest): WalletOutcome = when (request) {
+    private fun approved(id: Long, request: WalletRequest): WalletOutcome = when (request) {
         is WalletRequest.PersonalSign -> WalletOutcome.Signature(FAKE_SIGNATURE)
-        is WalletRequest.SendTransaction -> WalletOutcome.TransactionHash(FAKE_TX_HASH)
+        is WalletRequest.SendTransaction -> WalletOutcome.TransactionHash(txHashOf(id))
     }
 
     companion object {

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tx_pending_title">Pendiente</string>
+    <string name="tx_pending_body">Abre tu billetera y aprueba esta acción.</string>
+    <string name="tx_open_wallet">Abrir billetera</string>
+    <string name="tx_cancel">Cancelar %1$s</string>
+    <string name="tx_retry">Reintentar %1$s</string>
+    <string name="tx_action_signin">inicio de sesión</string>
+    <string name="tx_action_request">publicación</string>
+    <string name="tx_action_payment">pago</string>
+    <string name="tx_action_funding">fondeo</string>
+    <string name="tx_action_coins">solicitud de monedas de prueba</string>
+    <string name="tx_keep_waiting_confirm">Seguir esperando la confirmación</string>
+    <string name="tx_confirming_title">Confirmando</string>
+    <string name="tx_confirming_body">Tu acción fue enviada. Esperamos que la red la confirme.</string>
+    <string name="tx_slow">Esto tarda más de lo normal. Tu acción aún puede completarse. No la envíes otra vez.</string>
+    <string name="tx_confirmed_title">Confirmada</string>
+    <string name="tx_confirmed_body">La red confirmó esta acción.</string>
+    <string name="tx_failed_title">Fallida</string>
+    <string name="tx_fail_declined">Rechazaste la solicitud en tu billetera. No se envió nada.</string>
+    <string name="tx_fail_session">Se cerró la conexión con tu billetera. Reconéctala para continuar.</string>
+    <string name="tx_fail_fee">Tu billetera no tiene suficiente para pagar la comisión de red. Pide al equipo de LatiFi que la recargue y vuelve a intentarlo.</string>
+    <string name="tx_fail_tokens">No tienes suficientes tUSD para esta acción. Obtén monedas de prueba en Perfil.</string>
+    <string name="tx_fail_reverted">La red no pudo completar esta acción. No cambió nada, salvo la comisión de red.</string>
+    <string name="tx_fail_notopen">Esta solicitud ya no está abierta. Puede que otro prestamista la haya fondeado.</string>
+    <string name="tx_fail_network">No pudimos conectar con la red. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="tx_copy_address">Copiar dirección de la billetera</string>
+    <string name="receipt_label">Comprobante</string>
+    <string name="receipt_copy">Copiar comprobante</string>
+    <string name="receipt_copied">Comprobante copiado</string>
+    <string name="receipt_view">Ver comprobante en línea</string>
+    <string name="back_to_home">Volver al inicio</string>
+    <string name="back_to_requests">Volver a solicitudes</string>
+</resources>
