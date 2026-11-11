@@ -21,6 +21,9 @@ fun cfg(key: String, env: String, default: String): String {
     return fromFile ?: fromEnv ?: default
 }
 
+val reownProjectId = cfg("reown.projectId", "REOWN_PROJECT_ID", "00000000000000000000000000000000")
+val apiBaseUrl = cfg("api.baseUrl", "LATIFI_API_BASE_URL", "https://latifi-api.invalid/api/v1/")
+
 android {
     namespace = "com.latifi.wallet"
     compileSdk = 37
@@ -36,7 +39,7 @@ android {
         // A WalletConnect project id is not a secret, but a real one is never committed.
         buildConfigField(
             "String", "REOWN_PROJECT_ID",
-            "\"${cfg("reown.projectId", "REOWN_PROJECT_ID", "00000000000000000000000000000000")}\"",
+            "\"$reownProjectId\"",
         )
         buildConfigField(
             "String", "AMOY_RPC_URL",
@@ -45,7 +48,7 @@ android {
         // The .invalid TLD is reserved, so a placeholder host can never reach a real server.
         buildConfigField(
             "String", "API_BASE_URL",
-            "\"${cfg("api.baseUrl", "LATIFI_API_BASE_URL", "https://latifi-api.invalid/api/v1/")}\"",
+            "\"$apiBaseUrl\"",
         )
         buildConfigField(
             "String", "LANDING_URL",
@@ -66,8 +69,14 @@ android {
     }
 
     buildTypes {
+        // A release build must run Live. LIVE_REQUIRED makes the app refuse to start in Demo mode
+        // (AppConfig.requireLiveWhenRequired), and verifyReleaseConfig below stops the build first.
+        debug {
+            buildConfigField("boolean", "LIVE_REQUIRED", "false")
+        }
         release {
             isMinifyEnabled = false
+            buildConfigField("boolean", "LIVE_REQUIRED", "true")
         }
     }
 
@@ -98,6 +107,34 @@ android {
         error += listOf("MissingTranslation", "ExtraTranslation")
     }
 }
+
+// A release build with the placeholder project id or the placeholder .invalid API host would
+// silently run in Demo mode with a fake wallet and invented hashes, so it fails here instead.
+// Debug and the CI debug APK are not affected: the task only hangs off the release pre-build.
+val verifyReleaseConfig by tasks.registering {
+    group = "verification"
+    description = "Fails a release build that has no real Reown project id or API base URL."
+    val projectId = reownProjectId
+    val baseUrl = apiBaseUrl
+    doLast {
+        val problems = mutableListOf<String>()
+        if (!Regex("^[0-9a-f]{32}$").matches(projectId) || projectId == "00000000000000000000000000000000") {
+            problems += "REOWN_PROJECT_ID (or reown.projectId in local.properties) is missing or not a real 32 hex character id"
+        }
+        val host = baseUrl.substringAfter("://", "").substringBefore('/').substringBefore(':').lowercase()
+        if (host.isEmpty() || host.endsWith(".invalid")) {
+            problems += "LATIFI_API_BASE_URL (or api.baseUrl in local.properties) is missing or still the .invalid placeholder"
+        }
+        if (problems.isNotEmpty()) {
+            throw GradleException(
+                "A release build must run in Live mode, but: " + problems.joinToString("; ") +
+                    ". Set them or build the debug variant.",
+            )
+        }
+    }
+}
+
+tasks.matching { it.name == "preReleaseBuild" }.configureEach { dependsOn(verifyReleaseConfig) }
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))

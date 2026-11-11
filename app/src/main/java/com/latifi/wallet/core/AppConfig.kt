@@ -28,6 +28,22 @@ data class AppConfig(
     val mode: AppMode
         get() = if (isWalletConfigured && isApiConfigured) AppMode.Live else AppMode.Demo
 
+    /**
+     * A release build ([liveRequired]) must never fall back to Demo mode, which would show a fake
+     * wallet and invented transaction hashes as if they were real. It fails at start-up with a
+     * message that names what is missing. Debug and CI builds pass `false` and keep Demo mode.
+     */
+    fun requireLiveWhenRequired(liveRequired: Boolean): AppConfig {
+        if (liveRequired && mode != AppMode.Live) {
+            val missing = buildList {
+                if (!isWalletConfigured) add("the Reown project id")
+                if (!isApiConfigured) add("the API base URL")
+            }.joinToString(" and ")
+            throw IllegalStateException("Release build without Live configuration: $missing is missing")
+        }
+        return this
+    }
+
     companion object {
         const val PLACEHOLDER_PROJECT_ID = "00000000000000000000000000000000"
         private val PROJECT_ID_PATTERN = Regex("^[0-9a-f]{32}$")
@@ -44,6 +60,6 @@ data class AppConfig(
             termsUrl = BuildConfig.TERMS_URL,
             privacyUrl = BuildConfig.PRIVACY_URL,
             appIconUrl = BuildConfig.APP_ICON_URL,
-        )
+        ).requireLiveWhenRequired(BuildConfig.LIVE_REQUIRED)
     }
 }
