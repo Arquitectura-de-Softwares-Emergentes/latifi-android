@@ -11,6 +11,26 @@ The app runs in one of two modes, chosen at build time from the configuration be
 
 With the placeholder project id the app opens and shows that the wallet connection is not set up. It does not start the wallet SDK.
 
+## Live mode
+
+Live mode reads the real LatiFi API and a public Polygon Amoy node. The app picks it at build time, and only when both of these are set:
+
+- `reown.projectId` or `REOWN_PROJECT_ID`: a real 32 character WalletConnect project id.
+- `api.baseUrl` or `LATIFI_API_BASE_URL`: the real API address, ending with `/api/v1/`.
+
+If either one is missing, the app stays in Demo mode and needs nothing else. Demo mode never builds the HTTP stack.
+
+The chain reads (token balance, allowance, next installment and the transaction receipt) go to `amoy.rpcUrl` or `AMOY_RPC_URL`. The default is a public endpoint, which is enough for the app. If you use a provider that puts a key in the address, keep that URL in `local.properties` or in a CI variable. It never belongs in the repository, and the app never writes it to a log or an error message.
+
+What the live data layer does today:
+
+- Every API call sends `Accept-Language` as `en-US` or `es-419`.
+- The session token goes out only while it has not expired. When the API answers 401, the app asks the wallet for one new signature and repeats the call once.
+- The API error codes become the app's own messages. The server text is never shown.
+- A copy of the API contract (`app/src/test/resources/contract/latifi-api.v0.yaml`) sits next to the tests. A test compares it with the Retrofit interface, so a renamed or removed operation fails the build. When the API contract changes, copy the new file over it and update the interface.
+
+The live wallet connection arrives with plan 05-14. Until then a Live build fails with a message that names that plan when it builds the wallet gateway, so use Demo mode to try the app.
+
 ## Build and test
 
 You need JDK 21 (JDK 25 also works) and the Android SDK. On macOS with Homebrew command line tools:
