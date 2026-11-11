@@ -68,6 +68,12 @@ class DataStoreRecoveryStore(private val store: DataStore<Preferences>) : Recove
         store.edit { it.clear() }
     }
 
+    override suspend fun clearIf(requestId: Long) {
+        store.edit { prefs ->
+            if (prefs[REQUEST_ID] == requestId) prefs.clear()
+        }
+    }
+
     override suspend fun onSignOut() = clear()
 
     private fun String.toBigIntegerOrNull(): BigInteger? = try {

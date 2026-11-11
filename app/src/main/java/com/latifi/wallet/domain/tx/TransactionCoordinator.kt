@@ -70,6 +70,8 @@ class TransactionCoordinator(
         val startedAt: Long,
         val requestId: Long? = null,
         val hash: String? = null,
+        /** The id of the record this run wrote, kept across a reconnect so the run can clear exactly that one. */
+        val recordId: Long? = null,
     )
 
     private val lock = Any()
@@ -347,7 +349,7 @@ class TransactionCoordinator(
         }
         val early = locked {
             val running = run?.takeIf { it.gen == gen } ?: return
-            run = running.copy(requestId = id)
+            run = running.copy(requestId = id, recordId = id)
             earlyResponses.firstOrNull { it.requestId == id }.also { earlyResponses.clear() }
         }
         persist(gen, id)
@@ -466,24 +468,29 @@ class TransactionCoordinator(
 
     /** Moves a run in flight to a final state. A run that was abandoned or replaced is left alone. */
     private fun finish(gen: Int, next: TxState): Boolean {
+        var recordId: Long? = null
         val applied = locked {
-            if (run?.gen != gen || !mutableState.value.isBusy) return@locked false
+            val ending = run?.takeIf { it.gen == gen }
+            if (ending == null || !mutableState.value.isBusy) return@locked false
             slowJob?.cancel()
             pollJob?.cancel()
             mutableState.value = next
+            recordId = ending.recordId
             true
         }
         if (!applied) return false
         timer.stop()
-        scope.launch { recoveryMutex.withLock { recovery.clear() } }
+        clearRecord(recordId)
         overlays.show(Overlays.TX_STATUS)
         return true
     }
 
     /** Ends the flow with no result: back to Idle, the record cleared and the sheet closed. */
     private fun abandon(gen: Int? = null) {
+        var recordId: Long? = null
         val applied = locked {
             if (gen != null && run?.gen != gen) return@locked false
+            recordId = run?.recordId
             cancelJobs()
             generation += 1
             run = null
@@ -494,8 +501,21 @@ class TransactionCoordinator(
         }
         if (!applied) return
         timer.stop()
-        scope.launch { recoveryMutex.withLock { recovery.clear() } }
+        clearRecord(recordId)
         overlays.dismiss(Overlays.TX_STATUS)
+    }
+
+    /**
+     * Clears the record of [recordId] and no other. The coroutine starts undispatched, so it joins
+     * the queue of [recoveryMutex] at the call, in the order the runs ended, and a clear that is
+     * slow can never remove the record the next step writes. A run that never wrote one (the
+     * preflight failed first) has nothing to clear.
+     */
+    private fun clearRecord(recordId: Long?) {
+        if (recordId == null) return
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            recoveryMutex.withLock { recovery.clearIf(recordId) }
+        }
     }
 
     /** Sets the run that [record] describes, with no step to resend, and returns its generation. */
@@ -513,6 +533,7 @@ class TransactionCoordinator(
             startedAt = record.startedAtMillis,
             requestId = record.requestId,
             hash = record.txHash,
+            recordId = record.requestId,
         )
         mutableContext.value = context
         mutableState.value = st
