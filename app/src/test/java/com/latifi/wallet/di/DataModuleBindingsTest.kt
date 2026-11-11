@@ -18,6 +18,15 @@ import com.latifi.wallet.data.fake.FakeLoanRepository
 import com.latifi.wallet.data.fake.FakeProfileRepository
 import com.latifi.wallet.data.fake.FakeReputationRepository
 import com.latifi.wallet.data.fake.FakeRpcClient
+import com.latifi.wallet.data.fake.FakeWalletGateway
+import com.latifi.wallet.data.wallet.AppKitPickerBridge
+import com.latifi.wallet.data.wallet.AppKitWalletGateway
+import com.latifi.wallet.data.wallet.UriLauncher
+import com.latifi.wallet.support.FakeAppKitClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import com.latifi.wallet.support.testConfig
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -77,9 +86,23 @@ class DataModuleBindingsTest {
     }
 
     @Test
-    fun theLiveWalletGatewayStillNamesPlanZeroFiveFourteen() {
-        val failure = runCatching { DataModule.provideWalletGateway(live) }.exceptionOrNull()
+    fun demoBindsTheFakeWalletAndNeverBuildsTheAppKitGateway() {
+        var built = 0
+        val appKit = Provider<AppKitWalletGateway> {
+            built += 1
+            error("Demo must not build the AppKit gateway")
+        }
 
-        assertTrue(failure?.message.orEmpty().contains("05-14"))
+        assertTrue(DataModule.provideWalletGateway(demo, appKit) is FakeWalletGateway)
+        assertEquals(0, built)
+    }
+
+    @Test
+    fun liveBindsTheAppKitGateway() {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        val gateway = AppKitWalletGateway(FakeAppKitClient(), AppKitPickerBridge(), scope, Dispatchers.Unconfined, UriLauncher { })
+
+        assertTrue(DataModule.provideWalletGateway(live, Provider { gateway }) === gateway)
+        scope.cancel()
     }
 }

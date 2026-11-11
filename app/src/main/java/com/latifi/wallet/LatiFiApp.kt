@@ -1,20 +1,20 @@
 package com.latifi.wallet
 
 import android.app.Application
-import com.latifi.wallet.core.AppConfig
-import com.latifi.wallet.data.wallet.ReownBootstrap
+import dagger.Lazy
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
 @HiltAndroidApp
 class LatiFiApp : Application() {
+    // Lazy, so nothing wallet related is built before the start-up order in AppStartup runs.
     @Inject
-    lateinit var config: AppConfig
+    lateinit var startup: Lazy<AppStartup>
 
     override fun onCreate() {
         super.onCreate()
-        // Hilt has injected the config by now. The wallet SDK starts here, not in an
-        // activity, so a late wallet response is never lost after the process restarts.
-        ReownBootstrap.init(this, config)
+        // Hilt has injected by now. The wallet SDK, its delegate and the resumer start here, not in
+        // an activity, so a late wallet answer is never lost after the process restarts.
+        startup.get().run()
     }
 }

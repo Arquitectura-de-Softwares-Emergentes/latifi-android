@@ -33,10 +33,12 @@ jobs:
         uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
 
       - name: Lint, unit tests, debug APK and instrumented test APK
-        # REOWN_PROJECT_ID is optional. A blank value falls back to the placeholder id,
-        # so the build needs no secret.
+        # REOWN_PROJECT_ID and LATIFI_API_BASE_URL are optional repository variables. A blank
+        # value falls back to the placeholder, so the build needs no secret and stays green
+        # (and in demo mode) until they are set.
         env:
           REOWN_PROJECT_ID: ${{ vars.REOWN_PROJECT_ID }}
+          LATIFI_API_BASE_URL: ${{ vars.LATIFI_API_BASE_URL }}
         run: ./gradlew --no-daemon lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest
 
       - name: Upload lint and test reports

@@ -29,6 +29,11 @@ import com.latifi.wallet.data.prefs.DataStorePrefsStore
 import com.latifi.wallet.data.prefs.PREFS_FILE_NAME
 import com.latifi.wallet.data.fake.FakeRpcClient
 import com.latifi.wallet.data.session.InMemorySessionStore
+import com.latifi.wallet.data.session.KeystoreEnvelope
+import com.latifi.wallet.data.session.KeystoreSessionStore
+import com.latifi.wallet.data.session.SESSION_FILE_NAME
+import com.latifi.wallet.data.wallet.AppKitWalletGateway
+import com.latifi.wallet.data.wallet.UnconfiguredWalletGateway
 import com.latifi.wallet.data.tx.DataStoreRecoveryStore
 import com.latifi.wallet.data.tx.RECOVERY_FILE_NAME
 import com.latifi.wallet.domain.auth.AuthRepository
@@ -71,12 +76,15 @@ import javax.inject.Singleton
 
 private val Context.prefsDataStore: DataStore<Preferences> by preferencesDataStore(name = PREFS_FILE_NAME)
 private val Context.recoveryDataStore: DataStore<Preferences> by preferencesDataStore(name = RECOVERY_FILE_NAME)
+private val Context.sessionDataStore: DataStore<Preferences> by preferencesDataStore(name = SESSION_FILE_NAME)
 
 /**
  * Binds the wallet, auth, profile, loan, reputation, exchange rate, chain read, session, language and
  * preferences interfaces. [AppMode.Demo] binds the fakes. [AppMode.Live] binds the real API and
  * JSON-RPC implementations of plan 05-13, which reach the [LatiFiApi] through a [Provider] so Demo
- * mode never builds the HTTP stack. Only the live wallet gateway is still missing (plan 05-14).
+ * mode never builds the HTTP stack. Live also binds the AppKit wallet gateway and the session store
+ * sealed with the Android Keystore (plan 05-14), both reached through a [Provider] so Demo never
+ * builds them either.
  *
  * The module is abstract so it can hold the `@Multibinds` declaration of the sign-out hooks.
  * Plans 05-09, 05-11 and 05-12 add a hook with `@Binds @IntoSet` in their own module and never
@@ -110,11 +118,18 @@ abstract class DataModule {
         @Singleton
         fun provideClock(): Clock = Clock.systemUTC()
 
+        /**
+         * Demo binds the fake wallet. Live binds AppKit when the build has a real project id, which
+         * Live always has, and the unconfigured gateway for the case that cannot happen but would
+         * otherwise reach a wallet SDK that never started. The AppKit gateway is built on first use.
+         */
         @Provides
         @Singleton
-        fun provideWalletGateway(config: AppConfig): WalletGateway = when (config.mode) {
-            AppMode.Demo -> FakeWalletGateway(txHashOf = { id -> "0x" + id.toString(16).padStart(HASH_DIGITS, '0') })
-            AppMode.Live -> error("The live wallet gateway is added by plan 05-14. Build without a project id to use demo mode.")
+        fun provideWalletGateway(config: AppConfig, appKit: Provider<AppKitWalletGateway>): WalletGateway = when {
+            config.mode == AppMode.Demo ->
+                FakeWalletGateway(txHashOf = { id -> "0x" + id.toString(16).padStart(HASH_DIGITS, '0') })
+            config.isWalletConfigured -> appKit.get()
+            else -> UnconfiguredWalletGateway()
         }
 
         @Provides
@@ -160,10 +175,17 @@ abstract class DataModule {
             AppMode.Live -> ApiExchangeRateRepository(api.get())
         }
 
-        /** In memory for now. Plan 05-14 puts the sealed (Keystore encrypted) store behind the same interface. */
+        /**
+         * Demo keeps the session in memory, so a restart signs in again. Live seals the address, the
+         * token and the expiry with an AES-256-GCM key of the Android Keystore and keeps only the
+         * ciphertext in a DataStore file, so the session survives a process kill.
+         */
         @Provides
         @Singleton
-        fun provideSessionStore(): SessionStore = InMemorySessionStore()
+        fun provideSessionStore(config: AppConfig, @ApplicationContext context: Context): SessionStore = when (config.mode) {
+            AppMode.Demo -> InMemorySessionStore()
+            AppMode.Live -> KeystoreSessionStore(KeystoreEnvelope(), context.sessionDataStore)
+        }
 
         @Provides
         @Singleton
@@ -255,7 +277,7 @@ abstract class DataModule {
             sessions: SessionStore,
         ): Reconciler = ChainReconciler(chain, loans, sessions)
 
-        /** The application calls `resume()` once the wallet delegate is set (plan 05-14). */
+        /** [com.latifi.wallet.AppStartup] calls `resume()` once the wallet delegate is set. */
         @Provides
         @Singleton
         fun provideTransactionResumer(
