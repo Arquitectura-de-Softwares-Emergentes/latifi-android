@@ -1,5 +1,6 @@
 package com.latifi.wallet.data.api.dto
 
+import com.latifi.wallet.data.chain.Deployment
 import com.latifi.wallet.domain.auth.Challenge
 import com.latifi.wallet.domain.auth.Token
 import com.latifi.wallet.domain.model.BorrowerReputation
@@ -64,9 +65,25 @@ internal fun String.toEventTypeOrNull(): ReputationEventType? =
 
 private fun String.toContactTypeOrNull(): ContactType? = ContactType.entries.firstOrNull { it.name == this }
 
+/**
+ * A number the loan arithmetic divides by or multiplies with must be inside what the contract
+ * allows. A value outside it would reach a `require` in [com.latifi.wallet.core.LoanMath] and crash
+ * the screen, so it is rejected here as a [SerializationException], which ends as `AppError.Server`.
+ */
+private fun requireInRange(value: Long, range: LongRange, field: String) {
+    if (value !in range) throw SerializationException("A $field field is outside the range the contract allows")
+}
+
+/** The longest token lifetime the app accepts, in seconds. The API issues 15 minutes. */
+internal const val MAX_TOKEN_SECONDS = 86_400L
+
 /** Null when the status is one the app does not know, so a page never fails for a new status. */
 fun LoanSummaryDto.toDomainOrNull(): Loan? {
     val loanStatus = status.toLoanStatusOrNull() ?: return null
+    requireInRange(installments.toLong(), 1L..Deployment.MAX_INSTALLMENTS, "installments")
+    requireInRange(termDays.toLong(), 1L..Deployment.MAX_TERM_DAYS, "termDays")
+    requireInRange(interestRateBps.toLong(), 0L..Deployment.MAX_RATE_BPS, "interestRateBps")
+    requireInRange(installmentsPaid.toLong(), 0L..installments, "installmentsPaid")
     return Loan(
         loanId = loanId.toUint256(),
         borrower = borrower.toAddress(),
@@ -104,8 +121,10 @@ fun ChallengeResponseDto.toDomain(): Challenge =
         expiresAt = expiresAt.toInstantValue(),
     )
 
-fun TokenResponseDto.toDomain(): Token =
-    Token(accessToken = accessToken, expiresInSeconds = expiresIn, address = address.toAddress())
+fun TokenResponseDto.toDomain(): Token {
+    requireInRange(expiresIn, 1L..MAX_TOKEN_SECONDS, "expiresIn")
+    return Token(accessToken = accessToken, expiresInSeconds = expiresIn, address = address.toAddress())
+}
 
 fun ProfileResponseDto.toDomain(): Profile =
     Profile(
