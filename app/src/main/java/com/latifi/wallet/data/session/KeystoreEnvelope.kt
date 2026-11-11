@@ -5,8 +5,10 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyInfo
 import android.security.keystore.KeyProperties
 import android.util.Log
+import java.io.IOException
 import java.security.GeneralSecurityException
 import java.security.KeyStore
+import java.security.ProviderException
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -37,14 +39,23 @@ interface Envelope {
  * after a failure, so the caller treats the person as signed out and the next save starts clean.
  */
 class KeystoreEnvelope(private val alias: String = ALIAS) : Envelope {
-    override fun seal(plain: ByteArray): ByteArray =
+    // One lock for seal, open and reset: two threads that both find no key would otherwise make two
+    // keys with the same alias, and the second one would invalidate what the first one sealed.
+    private val lock = Any()
+
+    override fun seal(plain: ByteArray): ByteArray = synchronized(lock) {
         try {
             sealWith(key(), plain)
         } catch (e: GeneralSecurityException) {
             // The stored key is unusable, for instance after a lock screen reset. Start over once.
             reset()
             sealWith(key(), plain)
+        } catch (e: ProviderException) {
+            // An unstable Keystore reports a failed key or cipher setup this way. One fresh try.
+            reset()
+            sealWith(key(), plain)
         }
+    }
 
     private fun sealWith(key: SecretKey, plain: ByteArray): ByteArray {
         val cipher = Cipher.getInstance(TRANSFORMATION)
@@ -54,12 +65,12 @@ class KeystoreEnvelope(private val alias: String = ALIAS) : Envelope {
         return iv + cipher.doFinal(plain)
     }
 
-    override fun open(sealed: ByteArray): ByteArray {
+    override fun open(sealed: ByteArray): ByteArray = synchronized(lock) {
         try {
             if (sealed.size <= IV_BYTES + TAG_BYTES) throw GeneralSecurityException("The sealed blob is too short")
             val cipher = Cipher.getInstance(TRANSFORMATION)
             cipher.init(Cipher.DECRYPT_MODE, existingKey(), GCMParameterSpec(TAG_BITS, sealed.copyOfRange(0, IV_BYTES)))
-            return cipher.doFinal(sealed, IV_BYTES, sealed.size - IV_BYTES)
+            cipher.doFinal(sealed, IV_BYTES, sealed.size - IV_BYTES)
         } catch (e: GeneralSecurityException) {
             reset()
             throw e
@@ -67,10 +78,16 @@ class KeystoreEnvelope(private val alias: String = ALIAS) : Envelope {
     }
 
     override fun reset() {
-        try {
-            keyStore().deleteEntry(alias)
-        } catch (e: java.security.KeyStoreException) {
-            Log.w(TAG, "Session key not deleted: ${e.javaClass.simpleName}")
+        synchronized(lock) {
+            try {
+                keyStore().deleteEntry(alias)
+            } catch (e: GeneralSecurityException) {
+                Log.w(TAG, "Session key not deleted: ${e.javaClass.simpleName}")
+            } catch (e: IOException) {
+                Log.w(TAG, "Session key not deleted: ${e.javaClass.simpleName}")
+            } catch (e: ProviderException) {
+                Log.w(TAG, "Session key not deleted: ${e.javaClass.simpleName}")
+            }
         }
     }
 
