@@ -40,7 +40,10 @@ object WalletModule {
     @Provides
     @Singleton
     fun provideUriLauncher(application: Application): UriLauncher = UriLauncher { uri ->
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        // BROWSABLE keeps the link away from components that are not meant to open links.
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+            .addCategory(Intent.CATEGORY_BROWSABLE)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         try {
             application.startActivity(intent)
         } catch (e: android.content.ActivityNotFoundException) {
