@@ -2,6 +2,7 @@ package com.latifi.wallet.support
 
 import com.latifi.wallet.domain.tx.RecoveryRecord
 import com.latifi.wallet.domain.tx.RecoveryStore
+import kotlinx.coroutines.delay
 
 /** An in-memory [RecoveryStore]. [saves] and [updates] let a test see what the coordinator wrote and in which order. */
 class InMemoryRecoveryStore : RecoveryStore {
@@ -27,5 +28,17 @@ class InMemoryRecoveryStore : RecoveryStore {
     override suspend fun clear() {
         clears += 1
         record = null
+    }
+
+    /** The ids [clearIf] was asked about, in call order. [clears] counts only the unconditional [clear]. */
+    val conditionalClears = mutableListOf<Long>()
+
+    /** Makes [clearIf] slow, so a test can see that a late clear leaves the next record alone. */
+    var clearDelayMillis = 0L
+
+    override suspend fun clearIf(requestId: Long) {
+        conditionalClears += requestId
+        if (clearDelayMillis > 0) delay(clearDelayMillis)
+        if (record?.requestId == requestId) record = null
     }
 }

@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.math.BigInteger
 import javax.inject.Inject
 
 /** [needsWallet] is true when Get test coins was asked while no wallet is connected. */
@@ -54,7 +53,9 @@ class CoinsViewModel @Inject constructor(
         starting = true
         viewModelScope.launch {
             try {
-                val before = chain.tokenBalance(from).getOrNull()?.baseUnits ?: BigInteger.ZERO
+                // A balance that cannot be read stays null. It must not become a baseline of zero,
+                // because the reconciler would then read any balance as a mint that went through.
+                val before = chain.tokenBalance(from).getOrNull()?.baseUnits
                 val context = TxContext(
                     action = TxAction.Coins,
                     confirmedPrimary = TxPrimary(R.string.coins_view_balance) { balances.refresh() },

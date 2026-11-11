@@ -25,6 +25,8 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import java.net.URI
+import java.net.URISyntaxException
 import kotlin.coroutines.resume
 
 /** Starts a deep link, such as the wallet app of the active session. Android code lives behind this. */
@@ -163,8 +165,14 @@ class AppKitWalletGateway(
         private val SESSION_CODES = setOf(4900, 4901, 6000, 8000)
         private val REJECTED_CODES = setOf(4001, 5000)
 
-        // Schemes that must never be started from a link a remote wallet supplied.
-        private val BLOCKED_SCHEMES = setOf("intent", "file", "content", "javascript", "android-app", "data")
+        // Schemes that must never be started from a link a remote wallet supplied. The first group can
+        // start another component, the second one reaches the dialer, messages, maps, the store or
+        // a plain web page. Wallets use https links or their own scheme (`metamask://`), nothing else.
+        private val BLOCKED_SCHEMES = setOf(
+            "intent", "file", "content", "javascript", "android-app", "data",
+            "http", "tel", "sms", "smsto", "mms", "mmsto", "mailto", "geo", "market", "sip", "sips",
+            "ftp", "ws", "wss", "about", "blob", "vbscript", "tel-ussd",
+        )
         private val SCHEME = Regex("^([a-zA-Z][a-zA-Z0-9+.-]*):")
 
         fun classify(result: String): WalletOutcome = when {
@@ -179,9 +187,24 @@ class AppKitWalletGateway(
             else -> WalletOutcome.Failed(code, message)
         }
 
+        /**
+         * An https link needs a host and no user info (`https://a.com@evil.com`), the same rule as
+         * the in-app browser. Any other scheme has to be a wallet's own custom scheme, so every
+         * scheme in [BLOCKED_SCHEMES] is refused, plain http included.
+         */
         fun isSafeLink(link: String): Boolean {
             val scheme = SCHEME.find(link)?.groupValues?.get(1)?.lowercase() ?: return false
+            if (scheme == "https") return isHttpsWithHost(link)
             return scheme !in BLOCKED_SCHEMES
+        }
+
+        private fun isHttpsWithHost(link: String): Boolean {
+            val uri = try {
+                URI(link)
+            } catch (_: URISyntaxException) {
+                return false
+            }
+            return !uri.host.isNullOrEmpty() && uri.userInfo == null
         }
     }
 }

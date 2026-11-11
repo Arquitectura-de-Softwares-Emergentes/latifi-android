@@ -23,7 +23,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
+import java.io.IOException
 import java.security.GeneralSecurityException
+import java.security.ProviderException
 import java.time.Instant
 
 /**
@@ -177,5 +179,51 @@ class KeystoreSessionStoreTest {
 
         assertNull(fresh.current())
         assertTrue(data.data.first()[key] == null)
+    }
+
+    /** A DataStore whose file cannot be read, as after a damaged write or a full disk. */
+    private class UnreadableDataStore : DataStore<Preferences> {
+        override val data: kotlinx.coroutines.flow.Flow<Preferences> = kotlinx.coroutines.flow.flow { throw IOException("unreadable") }
+
+        override suspend fun updateData(transform: suspend (t: Preferences) -> Preferences): Preferences = throw IOException("unwritable")
+    }
+
+    @Test
+    fun aDataStoreThatThrowsIoReadsAsSignedOutInsteadOfCrashing() = runBlocking {
+        val store = KeystoreSessionStore(XorEnvelope(), UnreadableDataStore())
+
+        assertNull(store.current())
+        assertNull(store.session.first())
+    }
+
+    @Test
+    fun clearStillForgetsTheKeyWhenTheFileCannotBeWritten() = runBlocking {
+        val envelope = XorEnvelope()
+        val store = KeystoreSessionStore(envelope, UnreadableDataStore())
+
+        store.clear()
+
+        assertEquals(1, envelope.resets)
+    }
+
+    @Test
+    fun aKeystoreThatThrowsProviderExceptionReadsAsSignedOutAndKeepsTheBlob() = runBlocking {
+        val data = dataStore(File(tmp.root, "h.preferences_pb"))
+        KeystoreSessionStore(XorEnvelope(), data).save(session)
+        val key = stringPreferencesKey("sealed_session")
+        val unstable = KeystoreSessionStore(
+            object : Envelope {
+                override fun seal(plain: ByteArray) = plain
+
+                override fun open(sealed: ByteArray): ByteArray = throw ProviderException("keystore is unstable")
+
+                override fun reset() = Unit
+            },
+            data,
+        )
+
+        assertNull(unstable.current())
+        assertNull(unstable.session.first())
+        assertTrue("a failure that may pass keeps the blob", data.data.first()[key] != null)
     }
 }

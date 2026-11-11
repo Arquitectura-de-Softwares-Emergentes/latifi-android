@@ -352,6 +352,40 @@ class AppKitWalletGatewayTest {
     }
 
     @Test
+    fun linksToTheDialerPlainWebAndOtherNonWalletTargetsAreNeverOpened() = runTest {
+        val rig = Rig(this, account = lower)
+        runCurrent()
+
+        val unsafe = listOf(
+            "http://wallet.example/wc", "HTTP://wallet.example/wc", "tel:+10000000000", "sms:+10000000000",
+            "smsto:+10000000000", "mailto:a@b.example", "geo:0,0", "market://details?id=x",
+            "https://user@evil.example/wc", "https:///wc", "https://", "ftp://x.example/y",
+        )
+        for (link in unsafe) {
+            rig.client.redirect = link
+            rig.gateway.openWalletApp()
+            runCurrent()
+        }
+
+        assertTrue(rig.opened.toString(), rig.opened.isEmpty())
+    }
+
+    @Test
+    fun httpsLinksWithAHostAndWalletCustomSchemesAreStillOpened() = runTest {
+        val rig = Rig(this, account = lower)
+        runCurrent()
+
+        val safe = listOf("https://metamask.app.link/wc", "metamask://wc", "trust://wc?uri=x", "rainbow://")
+        for (link in safe) {
+            rig.client.redirect = link
+            rig.gateway.openWalletApp()
+            runCurrent()
+        }
+
+        assertEquals(safe, rig.opened)
+    }
+
+    @Test
     fun disconnectCallsTheClientAndSetsDisconnected() = runTest {
         val rig = Rig(this, account = lower)
         runCurrent()

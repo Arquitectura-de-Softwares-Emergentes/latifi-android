@@ -34,4 +34,11 @@ interface RecoveryStore {
     suspend fun current(): RecoveryRecord?
 
     suspend fun clear()
+
+    /**
+     * Clears the record only when it is the record of [requestId]. A run that ends clears its own
+     * record this way, so a late clear can never delete the record of the step that follows
+     * (the approve, then the fund).
+     */
+    suspend fun clearIf(requestId: Long)
 }

@@ -219,6 +219,40 @@ class TransactionCoordinatorTest {
     }
 
     @Test
+    fun aFinishedStepClearsOnlyItsOwnRecordNeverTheNextStepsRecord() = runTest {
+        val h = harness()
+        h.recovery.clearDelayMillis = 5_000
+        h.begin(context = TxContext(TxAction.Payment, stepIndex = 1, stepCount = 2))
+        advanceTimeBy(400 + 6_000)
+        runCurrent()
+        assertTrue(h.coordinator.state.value is TxState.Confirmed)
+
+        // The slow clear of step 1 is still running when step 2 starts and writes its record.
+        assertTrue(h.begin(context = TxContext(TxAction.Payment, stepIndex = 2, stepCount = 2)))
+        advanceTimeBy(10_000)
+        runCurrent()
+
+        assertEquals(listOf(1L), h.recovery.conditionalClears.take(1))
+        assertEquals("the record of the second request survives", 2L, h.recovery.record?.requestId)
+        assertEquals("no unconditional clear ran", 0, h.recovery.clears)
+    }
+
+    @Test
+    fun abandoningARunClearsItsOwnRecordWithTheConditionalClear() = runTest {
+        val h = harness(FakeWalletScript.NeverAnswer)
+        h.begin()
+        runCurrent()
+        assertEquals(1L, h.recovery.record?.requestId)
+
+        h.coordinator.cancel()
+        runCurrent()
+
+        assertNull(h.recovery.record)
+        assertEquals(listOf(1L), h.recovery.conditionalClears)
+        assertEquals(0, h.recovery.clears)
+    }
+
+    @Test
     fun disconnectForgetsTheRunClosesTheSheetAndClearsTheRecord() = runTest {
         val h = harness(FakeWalletScript.NeverAnswer)
         h.begin()

@@ -104,6 +104,18 @@ class DataStoreRecoveryStoreTest {
     }
 
     @Test
+    fun clearIfRemovesTheRecordOfThatRequestOnly() = runBlocking {
+        val s = store(File(tmp.root, "g.preferences_pb"))
+        s.save(record)
+
+        s.clearIf(record.requestId + 1)
+        assertEquals(record.requestId, s.current()?.requestId)
+
+        s.clearIf(record.requestId)
+        assertNull(s.current())
+    }
+
+    @Test
     fun disconnectClearsTheRecordThroughTheSignOutHook() = runBlocking {
         val s = store(File(tmp.root, "f.preferences_pb"))
         s.save(record)

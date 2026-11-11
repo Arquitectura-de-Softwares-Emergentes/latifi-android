@@ -6,6 +6,7 @@ import com.latifi.wallet.data.fake.FakeWalletGateway
 import com.latifi.wallet.data.fake.FakeWalletScript
 import com.latifi.wallet.domain.chain.ReceiptPoller
 import com.latifi.wallet.domain.tx.Preflight
+import com.latifi.wallet.domain.tx.Reconciler
 import com.latifi.wallet.domain.tx.TransactionCoordinator
 import com.latifi.wallet.domain.tx.TxAction
 import com.latifi.wallet.domain.tx.TxContext
@@ -22,7 +23,11 @@ import java.math.BigInteger
  * collectors of the coordinator and the fake wallet do not hold the test open, and the scheduler
  * of the test so every clock in the system is the same virtual one.
  */
-class TxHarness(scope: CoroutineScope, val scheduler: TestCoroutineScheduler) {
+class TxHarness(
+    scope: CoroutineScope,
+    val scheduler: TestCoroutineScheduler,
+    reconciler: Reconciler? = null,
+) {
     val wallet = FakeWalletGateway(
         scope = scope,
         initialState = WalletState.Connected(ADDRESS),
@@ -42,6 +47,7 @@ class TxHarness(scope: CoroutineScope, val scheduler: TestCoroutineScheduler) {
         recovery = recovery,
         overlays = overlays,
         nowMillis = { scheduler.currentTime },
+        reconciler = reconciler,
     )
 
     fun begin(

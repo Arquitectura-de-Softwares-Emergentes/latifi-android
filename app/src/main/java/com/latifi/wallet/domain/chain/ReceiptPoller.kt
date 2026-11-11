@@ -17,10 +17,13 @@ class ReceiptPoller(
     private val rpc: RpcClient,
     private val intervalMillis: Long = INTERVAL_MILLIS,
 ) {
-    /** Emits the first non-null receipt and ends. */
-    fun poll(hash: String): Flow<Receipt> = flow {
+    /**
+     * Emits the first non-null receipt and ends. It never ends on its own: the caller bounds it
+     * (the coordinator wraps it in a time window) and may ask for a slower [every] pace.
+     */
+    fun poll(hash: String, every: Long = intervalMillis): Flow<Receipt> = flow {
         while (true) {
-            delay(intervalMillis)
+            delay(every)
             val receipt = try {
                 rpc.getReceipt(hash).getOrNull()
             } catch (e: CancellationException) {

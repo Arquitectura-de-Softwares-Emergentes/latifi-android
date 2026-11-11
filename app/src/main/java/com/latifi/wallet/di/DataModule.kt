@@ -2,7 +2,9 @@ package com.latifi.wallet.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.latifi.wallet.core.AppConfig
 import com.latifi.wallet.core.AppMode
@@ -76,7 +78,11 @@ import javax.inject.Singleton
 
 private val Context.prefsDataStore: DataStore<Preferences> by preferencesDataStore(name = PREFS_FILE_NAME)
 private val Context.recoveryDataStore: DataStore<Preferences> by preferencesDataStore(name = RECOVERY_FILE_NAME)
-private val Context.sessionDataStore: DataStore<Preferences> by preferencesDataStore(name = SESSION_FILE_NAME)
+// A session file that is corrupt is replaced by an empty one: the person signs in again instead of the app failing at every start.
+private val Context.sessionDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = SESSION_FILE_NAME,
+    corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+)
 
 /**
  * Binds the wallet, auth, profile, loan, reputation, exchange rate, chain read, session, language and
@@ -229,6 +235,8 @@ abstract class DataModule {
             clock: Clock,
             chain: ChainReadRepository,
             loans: LoanRepository,
+            reconciler: Reconciler,
+            waiter: IndexerLagWaiter,
         ): TransactionCoordinator {
             wireDemoChain(wallet, rpc, chain, loans, clock)
             return TransactionCoordinator(
@@ -239,6 +247,8 @@ abstract class DataModule {
             recovery = recovery,
             overlays = overlays,
             nowMillis = clock::millis,
+            reconciler = reconciler,
+            lagWaiter = waiter,
             )
         }
 

@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 import java.security.MessageDigest
 
 /**
@@ -40,6 +41,12 @@ import java.security.MessageDigest
  *         Confirming -> (15 s) ConfirmingSlow ... never Failed because of delay
  *             | receipt 0x1 -> Confirmed        receipt 0x0 -> Failed(Reverted)
  * ```
+ *
+ * The receipt is polled in bounded windows ([RECEIPT_WINDOWS] of [RECEIPT_WINDOW_MILLIS]). After each
+ * one the chain and the API are asked whether the step went through (a replaced or sped up
+ * transaction has another hash but the same effect). When nothing shows, the polling stops and the
+ * state stays ConfirmingSlow: a dropped transaction never keeps the app polling for ever, and a
+ * delay is never read as a failure.
  *
  * The wallet only ever answers with the id of the request it was given, so an answer for any other
  * id is ignored. The in-flight record is written as soon as the request id is known, gets the hash
@@ -59,6 +66,9 @@ class TransactionCoordinator(
     private val nowMillis: () -> Long,
     waitTimeoutMillis: Long = WalletWaitTimer.DEFAULT_TIMEOUT_MILLIS,
     private val slowAfterMillis: Long = SLOW_AFTER_MILLIS,
+    private val reconciler: Reconciler? = null,
+    private val lagWaiter: IndexerLagWaiter = IndexerLagWaiter(),
+    private val receiptWindowMillis: Long = RECEIPT_WINDOW_MILLIS,
 ) : SignOutHook {
     /** One run of one transaction. Replaced, never edited, so a reader sees a consistent copy. */
     private data class Run(
@@ -70,6 +80,8 @@ class TransactionCoordinator(
         val startedAt: Long,
         val requestId: Long? = null,
         val hash: String? = null,
+        /** The id of the record this run wrote, kept across a reconnect so the run can clear exactly that one. */
+        val recordId: Long? = null,
     )
 
     private val lock = Any()
@@ -218,10 +230,13 @@ class TransactionCoordinator(
     fun keepWaitingConfirmation() {
         locked {
             val st = mutableState.value as? TxState.ConfirmingSlow ?: return
-            val gen = run?.gen ?: return
+            val running = run ?: return
+            val gen = running.gen
             mutableState.value = TxState.Confirming(st.hash)
             slowJob?.cancel()
             slowJob = armSlowMarker(gen, st.hash)
+            // The polling gave up after its windows: the person asked to wait, so it starts again.
+            if (pollJob?.isActive != true) pollJob = scope.launch { awaitReceipt(gen, st.hash, running.kind) }
         }
     }
 
@@ -347,7 +362,7 @@ class TransactionCoordinator(
         }
         val early = locked {
             val running = run?.takeIf { it.gen == gen } ?: return
-            run = running.copy(requestId = id)
+            run = running.copy(requestId = id, recordId = id)
             earlyResponses.firstOrNull { it.requestId == id }.also { earlyResponses.clear() }
         }
         persist(gen, id)
@@ -431,9 +446,45 @@ class TransactionCoordinator(
         locked {
             pollJob?.cancel()
             slowJob?.cancel()
-            pollJob = scope.launch { onReceipt(gen, hash, kind, poller.poll(hash).first()) }
+            pollJob = scope.launch { awaitReceipt(gen, hash, kind) }
             slowJob = armSlowMarker(gen, hash)
         }
+    }
+
+    /**
+     * Polls for the receipt in [RECEIPT_WINDOWS] windows. The first polls every 2 seconds, the
+     * later ones every [LATE_POLL_MILLIS]. After each window without a receipt the reconciler gets
+     * a look. When every window passed, the state is ConfirmingSlow and nothing is polled until
+     * the person asks to keep waiting or the app starts again. It never sets Failed.
+     */
+    private suspend fun awaitReceipt(gen: Int, hash: String, kind: TxKind) {
+        repeat(RECEIPT_WINDOWS) { window ->
+            val receipt = withTimeoutOrNull(receiptWindowMillis) {
+                if (window == 0) poller.poll(hash).first() else poller.poll(hash, LATE_POLL_MILLIS).first()
+            }
+            if (receipt != null) {
+                onReceipt(gen, hash, kind, receipt)
+                return
+            }
+            if (liveRun(gen) == null) return
+            if (reconcileOverdue(gen)) {
+                finish(gen, TxState.Confirmed(hash, loanId = null))
+                return
+            }
+        }
+        locked {
+            if (run?.gen == gen && mutableState.value == TxState.Confirming(hash)) {
+                mutableState.value = TxState.ConfirmingSlow(hash)
+            }
+        }
+    }
+
+    /** True when the chain and the API say the step of this run already happened, whatever its hash. */
+    private suspend fun reconcileOverdue(gen: Int): Boolean {
+        val reconciler = reconciler ?: return false
+        val recordId = liveRun(gen)?.recordId ?: return false
+        val record = recoveryMutex.withLock { recovery.current() }?.takeIf { it.requestId == recordId } ?: return false
+        return lagWaiter.await { liveRun(gen) != null && reconciler.hasCompleted(record) }
     }
 
     private fun armSlowMarker(gen: Int, hash: String): Job = scope.launch {
@@ -466,24 +517,29 @@ class TransactionCoordinator(
 
     /** Moves a run in flight to a final state. A run that was abandoned or replaced is left alone. */
     private fun finish(gen: Int, next: TxState): Boolean {
+        var recordId: Long? = null
         val applied = locked {
-            if (run?.gen != gen || !mutableState.value.isBusy) return@locked false
+            val ending = run?.takeIf { it.gen == gen }
+            if (ending == null || !mutableState.value.isBusy) return@locked false
             slowJob?.cancel()
             pollJob?.cancel()
             mutableState.value = next
+            recordId = ending.recordId
             true
         }
         if (!applied) return false
         timer.stop()
-        scope.launch { recoveryMutex.withLock { recovery.clear() } }
+        clearRecord(recordId)
         overlays.show(Overlays.TX_STATUS)
         return true
     }
 
     /** Ends the flow with no result: back to Idle, the record cleared and the sheet closed. */
     private fun abandon(gen: Int? = null) {
+        var recordId: Long? = null
         val applied = locked {
             if (gen != null && run?.gen != gen) return@locked false
+            recordId = run?.recordId
             cancelJobs()
             generation += 1
             run = null
@@ -494,8 +550,21 @@ class TransactionCoordinator(
         }
         if (!applied) return
         timer.stop()
-        scope.launch { recoveryMutex.withLock { recovery.clear() } }
+        clearRecord(recordId)
         overlays.dismiss(Overlays.TX_STATUS)
+    }
+
+    /**
+     * Clears the record of [recordId] and no other. The coroutine starts undispatched, so it joins
+     * the queue of [recoveryMutex] at the call, in the order the runs ended, and a clear that is
+     * slow can never remove the record the next step writes. A run that never wrote one (the
+     * preflight failed first) has nothing to clear.
+     */
+    private fun clearRecord(recordId: Long?) {
+        if (recordId == null) return
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            recoveryMutex.withLock { recovery.clearIf(recordId) }
+        }
     }
 
     /** Sets the run that [record] describes, with no step to resend, and returns its generation. */
@@ -513,6 +582,7 @@ class TransactionCoordinator(
             startedAt = record.startedAtMillis,
             requestId = record.requestId,
             hash = record.txHash,
+            recordId = record.requestId,
         )
         mutableContext.value = context
         mutableState.value = st
@@ -551,5 +621,12 @@ class TransactionCoordinator(
     companion object {
         /** After the hash, the receipt is late when it has not shown in 15 seconds. */
         const val SLOW_AFTER_MILLIS = 15_000L
+
+        /** One window of receipt polling. Three of them are 30 minutes, far more than Polygon needs. */
+        const val RECEIPT_WINDOW_MILLIS = 10 * 60_000L
+        const val RECEIPT_WINDOWS = 3
+
+        /** The pace of the windows after the first one. */
+        const val LATE_POLL_MILLIS = 30_000L
     }
 }
