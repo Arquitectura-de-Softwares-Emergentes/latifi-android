@@ -13,6 +13,8 @@ import com.latifi.wallet.data.api.ApiLoanRepository
 import com.latifi.wallet.data.api.ApiProfileRepository
 import com.latifi.wallet.data.api.ApiReputationRepository
 import com.latifi.wallet.data.api.LatiFiApi
+import com.latifi.wallet.data.chain.OkHttpRpcClient
+import com.latifi.wallet.data.chain.RpcChainReadRepository
 import com.latifi.wallet.data.fake.FakeAuthRepository
 import com.latifi.wallet.data.fake.FakeChainReadRepository
 import com.latifi.wallet.data.fake.FakeChainSimulator
@@ -138,10 +140,10 @@ abstract class DataModule {
 
         @Provides
         @Singleton
-        fun provideChainReadRepository(config: AppConfig, loans: LoanRepository): ChainReadRepository = when (config.mode) {
+        fun provideChainReadRepository(config: AppConfig, loans: LoanRepository, rpc: RpcClient): ChainReadRepository = when (config.mode) {
             // The fake follows the loans the fake API serves, so the next installment matches the loan list.
             AppMode.Demo -> FakeChainReadRepository(loans = { (loans as? FakeLoanRepository)?.loans.orEmpty() })
-            AppMode.Live -> error("The live chain reads are added by plan 05-11. Build without a project id to use demo mode.")
+            AppMode.Live -> RpcChainReadRepository(rpc)
         }
 
         @Provides
@@ -158,6 +160,7 @@ abstract class DataModule {
             AppMode.Live -> ApiExchangeRateRepository(api.get())
         }
 
+        /** In memory for now. Plan 05-14 puts the sealed (Keystore encrypted) store behind the same interface. */
         @Provides
         @Singleton
         fun provideSessionStore(): SessionStore = InMemorySessionStore()
@@ -176,7 +179,7 @@ abstract class DataModule {
         @Singleton
         fun provideRpcClient(config: AppConfig): RpcClient = when (config.mode) {
             AppMode.Demo -> FakeRpcClient()
-            AppMode.Live -> error("The live JSON-RPC client is added by plan 05-13. Build without a project id to use demo mode.")
+            AppMode.Live -> OkHttpRpcClient(config.amoyRpcUrl, ApiClientFactory.rpcHttpClient(), ApiClientFactory.json)
         }
 
         /** The 30 second wait for the indexer after a confirmed transaction. */
