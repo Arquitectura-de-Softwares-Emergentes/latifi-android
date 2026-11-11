@@ -6,6 +6,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.latifi.wallet.core.AppMode
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
@@ -33,6 +35,17 @@ class AppLaunchSmokeTest {
     @Test
     fun appBootsWithThePlaceholderReownId() {
         assertFalse(rule.activity.config.isWalletConfigured)
+        assertFalse(rule.activity.isFinishing)
+    }
+
+    @Test
+    fun thePlaceholderIdBootsDemoModeWithThePlainHostAndShowsAScreenWithoutACrash() {
+        // The wallet SDK never starts with the placeholder id, so the plain host and the fake wallet run.
+        assertEquals(AppMode.Demo, rule.activity.config.mode)
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val title = context.getString(R.string.onb1_title)
+        rule.waitUntil(timeoutMillis = 10_000) { rule.onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText(title).assertIsDisplayed()
         assertFalse(rule.activity.isFinishing)
     }
 }
