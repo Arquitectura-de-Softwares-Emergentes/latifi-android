@@ -2,6 +2,9 @@ package com.latifi.wallet.domain.session
 
 import com.latifi.wallet.domain.prefs.PrefsStore
 import com.latifi.wallet.domain.wallet.WalletGateway
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 /**
@@ -26,12 +29,21 @@ class SignOutUseCase @Inject constructor(
 ) {
     suspend operator fun invoke() {
         // One failing step must not leave credentials behind, so the local clearing always runs.
+        // The wallet gets a limited time: with the relay down the SDK may never answer, and the
+        // token, the address and the pending transaction record must not wait for it.
         try {
-            wallet.disconnect()
+            withTimeoutOrNull(WALLET_DISCONNECT_TIMEOUT_MILLIS) { wallet.disconnect() }
         } finally {
-            sessions.clear()
-            prefs.clearRole()
-            hooks.forEach { hook -> runCatching { hook.onSignOut() } }
+            // NonCancellable: a cancelled caller (the person leaves the screen) still clears the disk.
+            withContext(NonCancellable) {
+                sessions.clear()
+                prefs.clearRole()
+                hooks.forEach { hook -> runCatching { hook.onSignOut() } }
+            }
         }
+    }
+
+    companion object {
+        const val WALLET_DISCONNECT_TIMEOUT_MILLIS = 5_000L
     }
 }

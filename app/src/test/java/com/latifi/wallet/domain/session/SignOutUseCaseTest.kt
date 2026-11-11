@@ -7,7 +7,10 @@ import com.latifi.wallet.domain.model.AppRole
 import com.latifi.wallet.domain.wallet.WalletGateway
 import com.latifi.wallet.domain.wallet.WalletState
 import com.latifi.wallet.support.FakePrefsStore
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.currentTime
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -114,6 +117,26 @@ class SignOutUseCaseTest {
             assertTrue(expected.message.orEmpty().contains("wallet"))
         }
 
+        assertNull(sessions.current())
+        assertNull(prefs.role.first())
+        assertEquals(1, hook.runs)
+    }
+
+    @Test
+    fun aWalletThatNeverAnswersStillLeavesNoCredentialsBehindAfterTheTimeout() = runTest {
+        val base = FakeWalletGateway(initialState = WalletState.Connected(address))
+        val hanging = object : WalletGateway by base {
+            override suspend fun disconnect() = awaitCancellation()
+        }
+        val sessions = InMemorySessionStore().also {
+            it.save(Session(address, "token", Instant.parse("2030-01-01T00:00:00Z")))
+        }
+        val prefs = FakePrefsStore(role = AppRole.Borrower)
+        val hook = CountingHook()
+
+        SignOutUseCase(hanging, sessions, prefs, setOf(hook))()
+
+        assertEquals(SignOutUseCase.WALLET_DISCONNECT_TIMEOUT_MILLIS, currentTime)
         assertNull(sessions.current())
         assertNull(prefs.role.first())
         assertEquals(1, hook.runs)
