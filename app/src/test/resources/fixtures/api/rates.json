@@ -1,0 +1,18 @@
+{
+  "fresh": [
+    { "base": "USD", "quote": "PEN", "rate": "3.7512", "asOf": "2026-01-01T12:00:00Z", "stale": false },
+    { "base": "USD", "quote": "CLP", "rate": "950.5", "asOf": "2026-01-01T12:00:00Z", "stale": false }
+  ],
+  "stale": [
+    { "base": "USD", "quote": "PEN", "rate": "3.7512", "asOf": "2026-01-01T09:00:00Z", "stale": true },
+    { "base": "USD", "quote": "COP", "rate": "3900.00", "asOf": "2026-01-01T12:00:00Z", "stale": false }
+  ],
+  "convert": {
+    "amount": "250000000",
+    "currency": "PEN",
+    "value": "937.80",
+    "rate": "3.7512",
+    "asOf": "2026-01-01T12:00:00Z",
+    "stale": false
+  }
+}
