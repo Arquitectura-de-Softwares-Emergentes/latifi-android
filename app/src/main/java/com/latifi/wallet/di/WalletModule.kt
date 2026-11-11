@@ -4,11 +4,17 @@ import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import com.latifi.wallet.AppStartup
+import com.latifi.wallet.PendingResume
+import com.latifi.wallet.WalletBootstrap
+import com.latifi.wallet.core.AppConfig
 import com.latifi.wallet.data.wallet.AppKitClient
 import com.latifi.wallet.data.wallet.AppKitPickerBridge
 import com.latifi.wallet.data.wallet.AppKitWalletGateway
 import com.latifi.wallet.data.wallet.RealAppKitClient
+import com.latifi.wallet.data.wallet.ReownBootstrap
 import com.latifi.wallet.data.wallet.UriLauncher
+import com.latifi.wallet.domain.tx.TransactionResumer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,12 +22,13 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
  * The wallet side of the graph: the AppKit adapter, the gateway over it, the deep link launcher and
- * the ordered start-up. Nothing here touches the Reown SDK when it is built. The SDK starts in the
- * application start-up, and only when the build is in Live mode.
+ * the ordered start-up. Nothing here touches the Reown SDK when it is built. The SDK starts only in
+ * [AppStartup.run], and only when the build is in Live mode.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -54,5 +61,25 @@ object WalletModule {
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
         io = Dispatchers.IO,
         launcher = launcher,
+    )
+
+    @Provides
+    @Singleton
+    fun provideAppStartup(
+        application: Application,
+        config: AppConfig,
+        client: AppKitClient,
+        resumer: Provider<TransactionResumer>,
+    ): AppStartup = AppStartup(
+        config = config,
+        bootstrap = WalletBootstrap { ReownBootstrap.init(application, config, onReady = client::attachDelegate) },
+        client = client,
+        // Building the resumer builds the wallet gateway and the coordinator, which start their
+        // collectors. AppStartup asks for it before it registers the delegate.
+        resumer = Provider {
+            val real = resumer.get()
+            PendingResume { real.resume() }
+        },
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
     )
 }
