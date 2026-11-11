@@ -6,6 +6,15 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.latifi.wallet.core.AppConfig
 import com.latifi.wallet.core.AppMode
+import com.latifi.wallet.data.api.ApiAuthRepository
+import com.latifi.wallet.data.api.ApiClientFactory
+import com.latifi.wallet.data.api.ApiExchangeRateRepository
+import com.latifi.wallet.data.api.ApiLoanRepository
+import com.latifi.wallet.data.api.ApiProfileRepository
+import com.latifi.wallet.data.api.ApiReputationRepository
+import com.latifi.wallet.data.api.LatiFiApi
+import com.latifi.wallet.data.chain.OkHttpRpcClient
+import com.latifi.wallet.data.chain.RpcChainReadRepository
 import com.latifi.wallet.data.fake.FakeAuthRepository
 import com.latifi.wallet.data.fake.FakeChainReadRepository
 import com.latifi.wallet.data.fake.FakeChainSimulator
@@ -57,15 +66,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import java.time.Clock
+import javax.inject.Provider
 import javax.inject.Singleton
 
 private val Context.prefsDataStore: DataStore<Preferences> by preferencesDataStore(name = PREFS_FILE_NAME)
 private val Context.recoveryDataStore: DataStore<Preferences> by preferencesDataStore(name = RECOVERY_FILE_NAME)
 
 /**
- * Binds the wallet, auth, profile, loan, exchange rate, session, language and preferences interfaces. Demo mode (the
- * only mode that works until plans 05-13 and 05-14 add the live binding) uses the fake wallet
- * and fake API.
+ * Binds the wallet, auth, profile, loan, reputation, exchange rate, chain read, session, language and
+ * preferences interfaces. [AppMode.Demo] binds the fakes. [AppMode.Live] binds the real API and
+ * JSON-RPC implementations of plan 05-13, which reach the [LatiFiApi] through a [Provider] so Demo
+ * mode never builds the HTTP stack. Only the live wallet gateway is still missing (plan 05-14).
  *
  * The module is abstract so it can hold the `@Multibinds` declaration of the sign-out hooks.
  * Plans 05-09, 05-11 and 05-12 add a hook with `@Binds @IntoSet` in their own module and never
@@ -108,47 +119,48 @@ abstract class DataModule {
 
         @Provides
         @Singleton
-        fun provideAuthRepository(config: AppConfig, clock: Clock): AuthRepository = when (config.mode) {
+        fun provideAuthRepository(config: AppConfig, clock: Clock, api: Provider<LatiFiApi>): AuthRepository = when (config.mode) {
             AppMode.Demo -> FakeAuthRepository(clock)
-            AppMode.Live -> error("The live auth repository is added by plan 05-13. Build without a project id to use demo mode.")
+            AppMode.Live -> ApiAuthRepository(api.get())
         }
 
         @Provides
         @Singleton
-        fun provideProfileRepository(config: AppConfig, clock: Clock): ProfileRepository = when (config.mode) {
+        fun provideProfileRepository(config: AppConfig, clock: Clock, api: Provider<LatiFiApi>): ProfileRepository = when (config.mode) {
             AppMode.Demo -> FakeProfileRepository(clock)
-            AppMode.Live -> error("The live profile repository is added by plan 05-13. Build without a project id to use demo mode.")
+            AppMode.Live -> ApiProfileRepository(api.get())
         }
 
         @Provides
         @Singleton
-        fun provideLoanRepository(config: AppConfig, clock: Clock): LoanRepository = when (config.mode) {
+        fun provideLoanRepository(config: AppConfig, clock: Clock, api: Provider<LatiFiApi>): LoanRepository = when (config.mode) {
             AppMode.Demo -> FakeLoanRepository(clock)
-            AppMode.Live -> error("The live loan repository is added by plan 05-13. Build without a project id to use demo mode.")
+            AppMode.Live -> ApiLoanRepository(api.get())
         }
 
         @Provides
         @Singleton
-        fun provideChainReadRepository(config: AppConfig, loans: LoanRepository): ChainReadRepository = when (config.mode) {
+        fun provideChainReadRepository(config: AppConfig, loans: LoanRepository, rpc: RpcClient): ChainReadRepository = when (config.mode) {
             // The fake follows the loans the fake API serves, so the next installment matches the loan list.
             AppMode.Demo -> FakeChainReadRepository(loans = { (loans as? FakeLoanRepository)?.loans.orEmpty() })
-            AppMode.Live -> error("The live chain reads are added by plan 05-11. Build without a project id to use demo mode.")
+            AppMode.Live -> RpcChainReadRepository(rpc)
         }
 
         @Provides
         @Singleton
-        fun provideReputationRepository(config: AppConfig, clock: Clock): ReputationRepository = when (config.mode) {
+        fun provideReputationRepository(config: AppConfig, clock: Clock, api: Provider<LatiFiApi>): ReputationRepository = when (config.mode) {
             AppMode.Demo -> FakeReputationRepository(clock)
-            AppMode.Live -> error("The live reputation repository is added by plan 05-13. Build without a project id to use demo mode.")
+            AppMode.Live -> ApiReputationRepository(api.get())
         }
 
         @Provides
         @Singleton
-        fun provideExchangeRateRepository(config: AppConfig, clock: Clock): ExchangeRateRepository = when (config.mode) {
+        fun provideExchangeRateRepository(config: AppConfig, clock: Clock, api: Provider<LatiFiApi>): ExchangeRateRepository = when (config.mode) {
             AppMode.Demo -> FakeExchangeRateRepository(clock)
-            AppMode.Live -> error("The live exchange rate repository is added by plan 05-13. Build without a project id to use demo mode.")
+            AppMode.Live -> ApiExchangeRateRepository(api.get())
         }
 
+        /** In memory for now. Plan 05-14 puts the sealed (Keystore encrypted) store behind the same interface. */
         @Provides
         @Singleton
         fun provideSessionStore(): SessionStore = InMemorySessionStore()
@@ -167,7 +179,7 @@ abstract class DataModule {
         @Singleton
         fun provideRpcClient(config: AppConfig): RpcClient = when (config.mode) {
             AppMode.Demo -> FakeRpcClient()
-            AppMode.Live -> error("The live JSON-RPC client is added by plan 05-13. Build without a project id to use demo mode.")
+            AppMode.Live -> OkHttpRpcClient(config.amoyRpcUrl, ApiClientFactory.rpcHttpClient(), ApiClientFactory.json)
         }
 
         /** The 30 second wait for the indexer after a confirmed transaction. */
