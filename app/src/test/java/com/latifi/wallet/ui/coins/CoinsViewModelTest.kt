@@ -6,6 +6,7 @@ import com.latifi.wallet.data.chain.Erc20Abi
 import com.latifi.wallet.data.fake.FakeChainReadRepository
 import com.latifi.wallet.data.fake.FakeReceiptScript
 import com.latifi.wallet.data.fake.FakeWalletScript
+import com.latifi.wallet.domain.error.AppError
 import com.latifi.wallet.domain.tx.BalanceRefresh
 import com.latifi.wallet.domain.tx.FailReason
 import com.latifi.wallet.domain.tx.TxAction
@@ -54,6 +55,32 @@ class CoinsViewModelTest {
         assertEquals(Erc20Abi.mint(BigInteger.valueOf(1_000_000_000)), sent.single().data)
         assertEquals(TxAction.Coins, h.coordinator.context.value?.action)
         assertEquals("the coins sheet stepped aside for the status sheet", Overlays.TX_STATUS, h.overlays.current.value)
+    }
+
+    @Test
+    fun aBalanceThatCannotBeReadLeavesTheBaselineUnknownInsteadOfZero() = runTest {
+        val h = harness(FakeWalletScript.NeverAnswer)
+        chain.failNext(FakeChainReadRepository.Read.TokenBalance, AppError.Offline)
+        val vm = h.viewModel()
+
+        vm.confirm()
+        runCurrent()
+
+        assertEquals("the mint still goes out", 1, h.wallet.sentRequests.size)
+        val record = h.recovery.record!!
+        assertNull("no baseline is better than a wrong one", record.baseline)
+    }
+
+    @Test
+    fun aBalanceThatIsReadBecomesTheBaseline() = runTest {
+        val h = harness(FakeWalletScript.NeverAnswer)
+        val vm = h.viewModel()
+
+        vm.confirm()
+        runCurrent()
+
+        val balance = chain.tokenBalance(TxHarness.ADDRESS).getOrThrow().baseUnits
+        assertEquals(balance, h.recovery.record!!.baseline)
     }
 
     @Test

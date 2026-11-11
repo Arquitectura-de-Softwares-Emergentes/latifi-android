@@ -273,6 +273,14 @@ class TransactionResumerTest {
     }
 
     @Test
+    fun aMintWithNoBaselineIsNeverReadAsCompleted() = runTest {
+        val chain = StubChain(balance = BigInteger.valueOf(1_500))
+        val record = record(TxKind.Mint, 1).copy(baseline = null)
+
+        assertFalse("a balance with nothing to compare against proves nothing", reconciler(chain).hasCompleted(record))
+    }
+
+    @Test
     fun anApprovalCompletedWhenTheAllowanceCoversTheAmount() = runTest {
         val chain = StubChain(allowance = BigInteger.valueOf(99))
         val record = record(TxKind.Approve, 1).copy(amount = BigInteger.valueOf(100))

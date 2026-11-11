@@ -15,8 +15,12 @@ import java.math.BigInteger
  * balance before a mint, the allowance before an approval, and the repaid amount before a repay.
  */
 object TxPlans {
-    /** One test coin request: `mint(1000000000)` on the stablecoin. [balanceBefore] is the reconcile baseline. */
-    fun mint(balanceBefore: BigInteger): TxStep {
+    /**
+     * One test coin request: `mint(1000000000)` on the stablecoin. [balanceBefore] is the reconcile
+     * baseline. It is null when the balance could not be read: a baseline of zero would make any
+     * balance look like a finished mint, so such a record is never reconciled as completed.
+     */
+    fun mint(balanceBefore: BigInteger?): TxStep {
         val amount = BigInteger.valueOf(Deployment.MINT_PER_CALL_BASE_UNITS)
         return TxStep(
             kind = TxKind.Mint,
