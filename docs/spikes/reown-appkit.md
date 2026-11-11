@@ -54,3 +54,39 @@ If a Reown snippet does not compile, trust the compiler and the javap output of 
 - The redirect behavior of `launchMode="singleTask"` with the `latifi-wallet://request` filter.
 - A real project id, the allowlist for `com.latifi.wallet` and the landing domain in the Reown dashboard, and whether the user's wallet shows the Amoy test network.
 - License: the Reown packages use the WalletConnect community license. Cite it in the report.
+
+## Result of the implementation
+
+Plan 05-14 built the live wallet side on top of the shapes above. The adapter, the gateway, the sealed session and the start-up order are on `develop`.
+
+### The adapter
+
+`AppKitClient` is a small interface over the static AppKit API, so the gateway runs on the JVM with a fake. `RealAppKitClient` is the only class that imports Reown for this purpose (besides `ReownBootstrap` and the host composable). Its events are normalized to `SessionApproved(address)`, `SessionRejected`, `SessionDeleted`, `ConnectionError`, `ResponseResult(requestId, result)`, `ResponseError(requestId, code, message)` and `RequestExpired(requestId)`. The research listed six of these. `SessionRejected` was added so a person who declines in the wallet sees the declined message instead of a generic failure.
+
+`AppKitWalletGateway` turns the events into `WalletState` and `WalletResponse`:
+
+- It restores `Connected` from `AppKit.getAccount()` at construction, on an IO dispatcher, with a lowercase address.
+- `personal_sign` sends `[0x + utf8 hex, address]`. `eth_sendTransaction` sends one object with `from`, `to`, `data` and `value` and no fee field. Both use `eip155:80002`. The params come from JSON builders, never string templates.
+- A result of 132 characters is a signature and one of 66 a transaction hash. Codes 4001 and 5000 are `Rejected`. Codes 4900, 4901, 6000 and 8000 are `SessionLost`. Anything else keeps its code and message.
+- `openWalletApp()` follows the session deep link and never calls `request` again. The link comes from the wallet over the relay, so links of the schemes `intent`, `file`, `content`, `javascript`, `android-app` and `data` are never opened.
+- A connection error or a rejected proposal changes the state only while the person is connecting, so a relay hiccup cannot end a good session.
+
+### API shapes that differed from the research
+
+None. Every call compiled on the first try with the names the research recorded: `AppKit.ModalDelegate` with `onSessionApproved`, `onSessionRejected`, `onSessionDelete`, `onSessionRequestResponse`, `onRequestExpired` and `onError`; `Modal.Model.JsonRpcResponse.JsonRpcResult(id, result)` and `JsonRpcError(id, code, message)`; `SentRequestResult.WalletConnect.getRequestId()`; `Modal.Model.ApprovedSession.WalletConnectSession.accounts` with CAIP-10 ids; `Modal.Model.Session.getRedirect()`; `AppKit.extend` and `AppKit.disconnect`; `com.reown.appkit.ui.openAppKit` and `appKitGraph`. `AppKit.setDelegate` is declared `throws IllegalStateException`, so the client catches it and the bootstrap tries again when initialization reports success.
+
+### The session
+
+The address, the token and the expiry are one JSON blob sealed with AES-256-GCM. The key has the alias `latifi_session_wrap`, lives in the Android Keystore and has no exported bytes. The layout is the 12 byte IV, then the ciphertext and the tag. The DataStore file `latifi_session` holds only the Base64 text. A blob that fails to open is deleted and read as signed out. `androidx.security:security-crypto` is deprecated and was not added. `SessionEnvelopeTest` proves this on an emulator.
+
+### Start-up order
+
+`AppStartup` runs from `Application.onCreate` and only in Live mode: SDK start, the consumers of wallet answers (the gateway and the coordinator subscribe to their flows), the delegate, the session extension and then the transaction resumer. This answers research Pitfall 10.
+
+### Host and redirect
+
+`AppKitHost` keeps the only Material 2 imports and hands its controller to the one `NavHost`, which adds `appKitGraph`. `WalletPickerEffect` opens the picker when the gateway asks and reports when the screen that was showing comes back, so a person who leaves without choosing is not left waiting. `onNewIntent` reads nothing from the `latifi-wallet://request` link.
+
+### Still open for a real device
+
+All of it needs a phone, a wallet and a project id, and is listed in [DEVICE-CHECKLIST.md](../DEVICE-CHECKLIST.md): whether a response published while the app was dead is delivered after restart (assumption A2), the redirect with `singleTask` (A6), the AppKit modal theming and TalkBack reading (tracked in [EXCEPTIONS.md](../EXCEPTIONS.md) as EX-01), whether the wallet shows Amoy (A11), the Keystore security level, and one live Amoy cycle.
