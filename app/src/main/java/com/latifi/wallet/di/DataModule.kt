@@ -229,6 +229,8 @@ abstract class DataModule {
             clock: Clock,
             chain: ChainReadRepository,
             loans: LoanRepository,
+            reconciler: Reconciler,
+            waiter: IndexerLagWaiter,
         ): TransactionCoordinator {
             wireDemoChain(wallet, rpc, chain, loans, clock)
             return TransactionCoordinator(
@@ -239,6 +241,8 @@ abstract class DataModule {
             recovery = recovery,
             overlays = overlays,
             nowMillis = clock::millis,
+            reconciler = reconciler,
+            lagWaiter = waiter,
             )
         }
 
