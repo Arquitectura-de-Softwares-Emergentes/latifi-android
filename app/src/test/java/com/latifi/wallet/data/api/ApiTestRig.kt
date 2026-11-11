@@ -9,12 +9,15 @@ import java.io.File
 class ApiTestRig(
     interceptors: List<Interceptor> = emptyList(),
     authenticator: okhttp3.Authenticator? = null,
+    clientTweak: (okhttp3.OkHttpClient.Builder) -> okhttp3.OkHttpClient.Builder = { it },
 ) : AutoCloseable {
     val server = MockWebServer().apply { start() }
     val api: LatiFiApi = ApiClientFactory.api(
         ApiClientFactory.retrofit(
             baseUrl = server.url("/api/v1/").toString(),
-            client = ApiClientFactory.okHttpClient(debug = false, interceptors = interceptors, authenticator = authenticator),
+            client = clientTweak(
+                ApiClientFactory.okHttpClient(debug = false, interceptors = interceptors, authenticator = authenticator).newBuilder(),
+            ).build(),
         ),
     )
 
