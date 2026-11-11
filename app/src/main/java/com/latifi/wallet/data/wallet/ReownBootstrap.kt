@@ -13,13 +13,18 @@ import com.reown.appkit.utils.EthUtils
 /**
  * Starts the Reown core and AppKit, and only when the project id is a real one.
  * With the placeholder id the SDK is never touched, so the app cannot crash at startup.
- * Nothing here logs the project id, an address or a payload.
+ * Nothing here logs the project id, an address or a payload. The AppKit delegate is registered
+ * by [com.latifi.wallet.AppStartup], in the same `Application.onCreate`, so a late wallet answer finds it.
  */
 object ReownBootstrap {
     private const val TAG = "ReownBootstrap"
     const val REDIRECT = "latifi-wallet://request"
 
-    fun init(application: Application, config: AppConfig) {
+    /**
+     * [onReady] runs once AppKit reports a successful initialization. The caller passes the
+     * delegate registration, so it is tried again in case the SDK was not ready at the first try.
+     */
+    fun init(application: Application, config: AppConfig, onReady: () -> Unit = {}) {
         if (!config.isWalletConfigured) {
             Log.i(TAG, "Wallet connection is not configured, skipping AppKit initialization")
             return
@@ -45,10 +50,13 @@ object ReownBootstrap {
                 coinbaseEnabled = false,
                 enableAnalytics = false,
             ),
-            onSuccess = { AppKit.setChains(listOf(amoyChain(config))) },
+            onSuccess = {
+                AppKit.setChains(listOf(amoyChain(config)))
+                onReady()
+            },
             onError = { error -> Log.w(TAG, "AppKit initialization failed: ${error.throwable.javaClass.simpleName}") },
         )
-        // The delegate is set in the wallet gateway plan, in this same onCreate.
+        // The delegate is registered by AppStartup right after this call, through RealAppKitClient.
     }
 
     private fun amoyChain(config: AppConfig) = Modal.Model.Chain(
