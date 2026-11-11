@@ -22,6 +22,7 @@ import com.latifi.wallet.domain.rates.LocalValueProvider
 import com.latifi.wallet.domain.rates.RatesState
 import com.latifi.wallet.domain.reputation.ReputationRepository
 import com.latifi.wallet.domain.session.SessionStore
+import com.latifi.wallet.domain.tx.BalanceRefresh
 import com.latifi.wallet.ui.common.ErrorCopy
 import com.latifi.wallet.ui.common.Loadable
 import com.latifi.wallet.ui.nav.Overlays
@@ -93,6 +94,7 @@ class HomeViewModel @Inject constructor(
     private val overlays: OverlayController,
     hints: SessionHints,
     prefs: PrefsStore,
+    balanceRefresh: BalanceRefresh = BalanceRefresh(),
 ) : ViewModel() {
     private data class Sections(
         val balance: Loadable<TokenAmount> = Loadable.Loading,
@@ -131,6 +133,8 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { rates.ensure() }
+        // A confirmed test coin request asks for a fresh balance, so Home shows it without a reload.
+        viewModelScope.launch { balanceRefresh.ticks.collect { load(HomeSection.Balance) } }
         viewModelScope.launch {
             prefs.role.map { it ?: AppRole.Borrower }.distinctUntilChanged().collect { chosen ->
                 role.value = chosen

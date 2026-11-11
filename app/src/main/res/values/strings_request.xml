@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="request_step1">Amount and terms</string>
+    <string name="request_amount">Amount (tUSD)</string>
+    <string name="request_amount_help">Between 1 and 10,000 tUSD.</string>
+    <string name="request_rate" formatted="false">Interest rate (% a year)</string>
+    <string name="request_rate_help">Lenders see this rate. A higher rate costs you more.</string>
+    <string name="request_term">Term</string>
+    <string name="request_term_other">Other</string>
+    <string name="request_term_days">Days</string>
+    <string name="request_installments">Installments</string>
+    <string name="request_installments_dec">Decrease installments</string>
+    <string name="request_installments_inc">Increase installments</string>
+    <string name="request_review">Review request</string>
+    <string name="request_disabled_reason">Fill in the amount, rate and term to continue.</string>
+    <string name="err_amount_range">Enter an amount between 1 and 10,000 tUSD.</string>
+    <string name="err_rate_range">Enter a rate between %1$s%% and %2$s%%.</string>
+    <string name="err_term_range">Enter between 1 and 365 days.</string>
+    <string name="request_review_title">Review your request</string>
+    <string name="request_each">Each installment</string>
+    <string name="request_first_due">The first installment is due after a lender funds your request.</string>
+    <string name="request_publish">Publish request</string>
+    <string name="request_success_title">Your request is open</string>
+    <string name="request_success_body">Lenders can see it now. You will find it in Loans.</string>
+    <string name="request_view_loans">View my loans</string>
+    <string name="leave_title">Leave this request?</string>
+    <string name="leave_body">Your changes will not be saved.</string>
+    <string name="leave_confirm">Leave request</string>
+    <string name="leave_stay">Keep editing request</string>
+</resources>

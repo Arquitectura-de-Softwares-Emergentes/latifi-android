@@ -41,6 +41,10 @@ data class TxContext(
     val stepIndex: Int = 1,
     val stepCount: Int = 1,
     val confirmedPrimary: TxPrimary? = null,
+    @StringRes val successTitleRes: Int? = null,
+    @StringRes val successBodyRes: Int? = null,
+    /** The exact amount of an approve step, as text without the unit. The sheet says what is being allowed. */
+    val allowAmountText: String? = null,
     val onBackToHome: (() -> Unit)? = null,
     val onBackToRequests: (() -> Unit)? = null,
 )

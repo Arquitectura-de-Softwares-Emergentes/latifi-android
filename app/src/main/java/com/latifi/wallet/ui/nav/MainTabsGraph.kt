@@ -1,7 +1,15 @@
 package com.latifi.wallet.ui.nav
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import java.math.BigInteger
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -26,12 +34,24 @@ fun NavGraphBuilder.mainTabsGraph(rootController: NavHostController, role: () ->
     // [role] is read inside the destination, so a role change recomposes the tabs without
     // rebuilding the graph. [rootController] is the app NavHost: a tab uses it to open screens
     // that sit above the tabs (the profile form, Connect wallet after a disconnect).
-    composable(Routes.MAIN) { MainTabs(role(), rootController) }
+    composable(Routes.MAIN) { entry -> MainTabs(role(), rootController, entry.savedStateHandle) }
 }
 
 @Composable
-internal fun MainTabs(role: AppRole, rootController: NavHostController) {
+internal fun MainTabs(
+    role: AppRole,
+    rootController: NavHostController,
+    savedState: SavedStateHandle? = null,
+) {
     val tabController = rememberNavController()
+    // A finished flow asks for a tab through the saved state of this entry, once.
+    val requestedTab by (savedState?.getStateFlow<String?>(OPEN_TAB_KEY, null) ?: remember { MutableStateFlow<String?>(null) })
+        .collectAsStateWithLifecycle()
+    LaunchedEffect(requestedTab) {
+        val tab = TabDestination.fromRoute(requestedTab) ?: return@LaunchedEffect
+        tabController.selectTab(tab)
+        savedState?.set(OPEN_TAB_KEY, null)
+    }
     val entry by tabController.currentBackStackEntryAsState()
     val selected = TabDestination.fromRoute(entry?.destination?.route) ?: TabDestination.Home
 
@@ -42,14 +62,29 @@ internal fun MainTabs(role: AppRole, rootController: NavHostController) {
     ) {
         NavHost(navController = tabController, startDestination = Routes.HOME) {
             // Each feature plan replaces the placeholder of its tab with the real screen.
-            composable(Routes.HOME) { HomeRoute(onBrowse = { tabController.selectTab(TabDestination.Invest) }) }
-            composable(Routes.LOANS) { LoansRoute(rootController) }
+            composable(Routes.HOME) {
+                val requestLoan = rememberGatedNavigation(rootController) { Routes.REQUEST_LOAN }
+                HomeRoute(
+                    onBrowse = { tabController.selectTab(TabDestination.Invest) },
+                    onRequestLoan = requestLoan,
+                    onPay = { id -> rootController.navigate(Routes.pay(id)) },
+                )
+            }
+            composable(Routes.LOANS) {
+                val requestLoan = rememberGatedNavigation(rootController) { Routes.REQUEST_LOAN }
+                LoansRoute(rootController, onRequestLoan = requestLoan)
+            }
             composable(Routes.REPUTATION) { ReputationRoute(rootController) }
             composable(Routes.INVEST) {
+                // The card button passes the profile gate and then opens the funding flow.
+                var pendingFund by remember { mutableStateOf<BigInteger?>(null) }
+                val fundGate = rememberGatedNavigation(rootController) { Routes.fund(pendingFund ?: BigInteger.ZERO) }
                 FeedRoute(
                     onOpen = { loanId -> rootController.navigate(Routes.requestDetail(loanId)) },
-                    // The funding flow is registered by plan 05-12. Until then the card button does nothing.
-                    onFund = {},
+                    onFund = { loanId ->
+                        pendingFund = loanId
+                        fundGate()
+                    },
                 )
             }
             composable(Routes.PORTFOLIO) {

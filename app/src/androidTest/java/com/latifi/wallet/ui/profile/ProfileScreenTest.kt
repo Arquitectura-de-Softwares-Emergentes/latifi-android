@@ -175,6 +175,9 @@ class ProfileScreenTest {
 
     @Test
     fun disconnectOpensTheDialogWithTheSafeActionFocusedFirst() {
+        // The v2 rule starts in touch mode, where a button cannot hold input focus. A person with a
+        // keyboard or a D-pad is not in touch mode, so the window leaves it first (one attempt, see deferred-items).
+        InstrumentationRegistry.getInstrumentation().setInTouchMode(false)
         show()
         rule.onNodeWithText(text(R.string.disconnect_action)).performScrollTo().assert(isButton).performClick()
 

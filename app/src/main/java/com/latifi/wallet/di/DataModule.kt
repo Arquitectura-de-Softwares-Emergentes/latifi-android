@@ -8,6 +8,8 @@ import com.latifi.wallet.core.AppConfig
 import com.latifi.wallet.core.AppMode
 import com.latifi.wallet.data.fake.FakeAuthRepository
 import com.latifi.wallet.data.fake.FakeChainReadRepository
+import com.latifi.wallet.data.fake.FakeChainSimulator
+import com.latifi.wallet.data.fake.FakeReceiptScript
 import com.latifi.wallet.data.fake.FakeExchangeRateRepository
 import com.latifi.wallet.data.fake.FakeLoanRepository
 import com.latifi.wallet.data.fake.FakeProfileRepository
@@ -100,7 +102,7 @@ abstract class DataModule {
         @Provides
         @Singleton
         fun provideWalletGateway(config: AppConfig): WalletGateway = when (config.mode) {
-            AppMode.Demo -> FakeWalletGateway()
+            AppMode.Demo -> FakeWalletGateway(txHashOf = { id -> "0x" + id.toString(16).padStart(HASH_DIGITS, '0') })
             AppMode.Live -> error("The live wallet gateway is added by plan 05-14. Build without a project id to use demo mode.")
         }
 
@@ -168,6 +170,11 @@ abstract class DataModule {
             AppMode.Live -> error("The live JSON-RPC client is added by plan 05-13. Build without a project id to use demo mode.")
         }
 
+        /** The 30 second wait for the indexer after a confirmed transaction. */
+        @Provides
+        @Singleton
+        fun provideIndexerLagWaiter(): IndexerLagWaiter = IndexerLagWaiter()
+
         @Provides
         @Singleton
         fun provideReceiptPoller(rpc: RpcClient): ReceiptPoller = ReceiptPoller(rpc)
@@ -186,7 +193,11 @@ abstract class DataModule {
             recovery: RecoveryStore,
             overlays: OverlayController,
             clock: Clock,
-        ): TransactionCoordinator = TransactionCoordinator(
+            chain: ChainReadRepository,
+            loans: LoanRepository,
+        ): TransactionCoordinator {
+            wireDemoChain(wallet, rpc, chain, loans, clock)
+            return TransactionCoordinator(
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
             wallet = wallet,
             preflight = Preflight(rpc),
@@ -194,7 +205,35 @@ abstract class DataModule {
             recovery = recovery,
             overlays = overlays,
             nowMillis = clock::millis,
-        )
+            )
+        }
+
+        /**
+         * In Demo mode an approved transaction changes the fake chain: the simulator applies the
+         * calldata and the fake node answers the receipt. Live mode has none of these fakes, so
+         * nothing is wired and the simulator never exists outside Demo.
+         */
+        private fun wireDemoChain(
+            wallet: WalletGateway,
+            rpc: RpcClient,
+            chain: ChainReadRepository,
+            loans: LoanRepository,
+            clock: Clock,
+        ) {
+            if (wallet !is FakeWalletGateway || rpc !is FakeRpcClient ||
+                chain !is FakeChainReadRepository || loans !is FakeLoanRepository
+            ) {
+                return
+            }
+            val simulator = FakeChainSimulator(chain, loans, clock)
+            wallet.onSend = { hash, request ->
+                val result = simulator.apply(request.from, request.to, request.data)
+                rpc.script(hash, FakeReceiptScript(nullPolls = DEMO_NULL_POLLS, status = result.status, logs = result.logs))
+            }
+        }
+
+        private const val HASH_DIGITS = 64
+        private const val DEMO_NULL_POLLS = 2
 
         @Provides
         @Singleton

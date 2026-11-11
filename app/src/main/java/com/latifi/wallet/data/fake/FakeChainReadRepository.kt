@@ -51,6 +51,13 @@ class FakeChainReadRepository(
         allowances[key(owner) to key(spender)] = amount
     }
 
+    /** The token balance in base units, without logging a read. The chain simulator uses it. */
+    fun tokenUnitsOf(address: String): BigInteger = tokens[key(address)]?.baseUnits ?: BigInteger.ZERO
+
+    /** The allowance in base units, without logging a read. The chain simulator uses it. */
+    fun allowanceUnitsOf(owner: String, spender: String): BigInteger =
+        allowances[key(owner) to key(spender)] ?: BigInteger.ZERO
+
     /** The next call of [read] fails with [error], once. */
     fun failNext(read: Read, error: AppError) {
         failures[read] = error

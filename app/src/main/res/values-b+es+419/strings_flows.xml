@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_fee_note">Tu billetera cobra una pequeña comisión de red para procesar cada acción. La ves antes de firmar.</string>
+    <string name="tx_allow_title">Permitir el pago</string>
+    <string name="tx_allow_body">Tu billetera permitirá que el contrato del préstamo mueva exactamente %1$s tUSD para este préstamo. Nada más.</string>
+    <string name="pay_title">Pagar cuota %1$d de %2$d</string>
+    <string name="pay_amount">Monto a pagar</string>
+    <string name="pay_due">Vence el %1$s</string>
+    <string name="pay_line">Pagas desde tu billetera. LatiFi nunca mueve tu dinero.</string>
+    <string name="pay_late">Esta cuota está atrasada. Todavía puedes pagarla.</string>
+    <string name="pay_confirm">Confirmar pago</string>
+    <string name="pay_success_title">Cuota pagada</string>
+    <string name="pay_success_body">Tu reputación se actualiza poco después de que la red confirme este pago.</string>
+    <string name="fund_title">Confirmar fondeo</string>
+    <string name="fund_confirm">Confirmar fondeo</string>
+    <string name="fund_terms_fixed">Las condiciones quedan fijas cuando firmas.</string>
+    <string name="fund_success_title">Solicitud fondeada</string>
+    <string name="fund_success_body">La encontrarás en Portafolio.</string>
+    <string name="fund_view_portfolio">Ver portafolio</string>
+    <string name="back_to_loans">Volver a préstamos</string>
+</resources>

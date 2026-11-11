@@ -150,6 +150,11 @@ private fun WalletGroup(state: ProfileUiState, onEvent: (ProfileEvent) -> Unit, 
             onClick = { onEvent(ProfileEvent.CopyAddress) },
         )
         ActionRow(
+            icon = R.drawable.ic_payments,
+            label = stringResource(R.string.coins_cta),
+            onClick = { onEvent(ProfileEvent.GetCoins) },
+        )
+        ActionRow(
             icon = R.drawable.ic_logout,
             label = stringResource(R.string.disconnect_action),
             onClick = { onEvent(ProfileEvent.AskDisconnect) },

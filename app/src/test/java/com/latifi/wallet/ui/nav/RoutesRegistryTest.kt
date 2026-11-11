@@ -44,10 +44,27 @@ class RoutesRegistryTest {
             setOf(
                 "ONBOARDING", "HOW_IT_WORKS", "CONNECT", "ROLE", "PROFILE_FORM",
                 "MAIN", "HOME", "LOANS", "REPUTATION", "INVEST", "PORTFOLIO", "PROFILE", "LOAN_DETAIL",
-                "REQUEST_DETAIL", "INVESTMENT_DETAIL",
+                "REQUEST_DETAIL", "INVESTMENT_DETAIL", "REQUEST_LOAN", "PAY", "FUND",
             ),
             scan.registeredRoutes,
         )
+    }
+
+    @Test
+    fun bothPendingSetsAreEmptyBecauseEveryScreenIsBuilt() {
+        assertTrue("pending routes: $PENDING_ROUTES", PENDING_ROUTES.isEmpty())
+        assertTrue("pending overlays: $PENDING_OVERLAYS", PENDING_OVERLAYS.isEmpty())
+    }
+
+    @Test
+    fun theTabWiringOpensTheRequestPayAndFundFlows() {
+        val nav = File(ResourceScan.SOURCE_ROOT, "com/latifi/wallet/ui/nav")
+        val wiring = listOf("MainTabsGraph.kt", "LoansGraph.kt", "LatiFiNavHost.kt")
+            .joinToString("\n") { File(nav, it).readText() }
+
+        assertTrue("Routes.pay( is used", wiring.contains("Routes.pay("))
+        assertTrue("Routes.fund( is used", wiring.contains("Routes.fund("))
+        assertTrue("Routes.REQUEST_LOAN is used", wiring.contains("Routes.REQUEST_LOAN"))
     }
 
     @Test
@@ -140,12 +157,10 @@ class RoutesRegistryTest {
 
     companion object {
         /** Routes whose screen is not built yet. Remove a name in the plan that registers it. */
-        val PENDING_ROUTES = setOf(
-            "REQUEST_LOAN", "PAY", "FUND",
-        )
+        val PENDING_ROUTES = emptySet<String>()
 
         /** Overlays whose sheet is not built yet. Remove a name in the plan that registers it. */
-        val PENDING_OVERLAYS = setOf("COINS")
+        val PENDING_OVERLAYS = emptySet<String>()
 
         fun findings(scan: Scan, pendingRoutes: Set<String>, pendingOverlays: Set<String>): List<String> {
             val found = mutableListOf<String>()
