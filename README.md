@@ -43,6 +43,8 @@ export ANDROID_SDK_ROOT=$ANDROID_HOME
 ./gradlew lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest
 ```
 
+A signed release build and the upload to testers use two scripts, described in [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md): `scripts/release/build-release.sh` and `scripts/release/distribute.sh`.
+
 The debug APK lands in `app/build/outputs/apk/debug/app-debug.apk`. The instrumented tests need an emulator or a device, so they only compile locally. CI runs them on an API 34 emulator in the advisory `android-instrumented` workflow.
 
 ## Configuration
@@ -54,12 +56,14 @@ Each value comes from `local.properties` (git-ignored), then from an environment
 | `reown.projectId` | `REOWN_PROJECT_ID` | 32 zeros |
 | `amoy.rpcUrl` | `AMOY_RPC_URL` | public Polygon Amoy RPC |
 | `api.baseUrl` | `LATIFI_API_BASE_URL` | `https://latifi-api.invalid/api/v1/` |
-| `landing.url` | `LATIFI_LANDING_URL` | `https://latifi.invalid` |
-| `terms.url` | `LATIFI_TERMS_URL` | `https://latifi.invalid/terms` |
-| `privacy.url` | `LATIFI_PRIVACY_URL` | `https://latifi.invalid/privacy` |
+| `landing.url` | `LATIFI_LANDING_URL` | `https://arquitectura-de-softwares-emergentes.github.io/latifi-landing/` |
+| `terms.url` | `LATIFI_TERMS_URL` | `https://arquitectura-de-softwares-emergentes.github.io/latifi-landing/terms.html` |
+| `privacy.url` | `LATIFI_PRIVACY_URL` | `https://arquitectura-de-softwares-emergentes.github.io/latifi-landing/privacy.html` |
 | `icon.url` | `LATIFI_ICON_URL` | `https://latifi.invalid/icon.png` |
 
-The `.invalid` top level domain is reserved, so a placeholder host can never reach a real server.
+The `.invalid` top level domain is reserved, so a placeholder host can never reach a real server. The landing, terms and privacy defaults are the live pages of the landing site.
+
+Release builds read four more values (see [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md)): `signing.storeFile`, `signing.storePassword`, `signing.keyAlias` and `signing.keyPassword` (variables `LATIFI_KEYSTORE_PATH`, `LATIFI_KEYSTORE_PASSWORD`, `LATIFI_KEY_ALIAS` and `LATIFI_KEY_PASSWORD`), plus `version.code` and `version.name` (`LATIFI_VERSION_CODE`, `LATIFI_VERSION_NAME`, defaults 1 and 0.1.0). The release build refuses to start without a key kept outside the repository.
 
 A WalletConnect project id is not a secret, because it ships inside every APK. It still never goes into the repository. Set it in `local.properties` or in the `REOWN_PROJECT_ID` repository variable.
 
@@ -67,6 +71,7 @@ The repository variables `REOWN_PROJECT_ID` and `LATIFI_API_BASE_URL` are option
 
 ## Documents
 
+- [Distribution guide](docs/DISTRIBUTION.md): signing key, signed release build, Firebase App Distribution upload and the clean device install checklist.
 - [Device checklist](docs/DEVICE-CHECKLIST.md): the checks that need a physical phone, a real wallet and a project id, with a result column.
 - [Accessibility exceptions](docs/EXCEPTIONS.md): the register, with the Reown AppKit entry.
 - [Requirement traceability](docs/TRACEABILITY.md): the nine Phase 5 requirements and the tests that prove them. The evidence uses fakes and MockWebServer, not a live wallet or a live API.
