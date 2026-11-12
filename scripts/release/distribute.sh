@@ -131,7 +131,7 @@ if [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
   case "$CRED_REAL" in
     "$ROOT"/*) usage_error "the service account file lives inside the repository. Keep it outside" ;;
   esac
-  CRED_MODE="$(stat -f '%Lp' "$CRED" 2>/dev/null || stat -c '%a' "$CRED" 2>/dev/null)"
+  CRED_MODE="$(stat -c '%a' "$CRED" 2>/dev/null || stat -f '%Lp' "$CRED" 2>/dev/null)"
   [ "$CRED_MODE" = "600" ] || usage_error "the service account file must have mode 600 (chmod 600 it)"
 fi
 
