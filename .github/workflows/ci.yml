@@ -41,6 +41,36 @@ jobs:
           LATIFI_API_BASE_URL: ${{ vars.LATIFI_API_BASE_URL }}
         run: ./gradlew --no-daemon lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest
 
+      - name: Release scripts offline tests
+        # Stubs stand in for gradlew, apksigner, aapt2 and firebase. No key, SDK tool or account needed.
+        run: bash scripts/release/release.test.sh
+
+      - name: Prove the release guard rejects placeholders
+        # A guard that cannot fail proves nothing. With every release input blank the task must
+        # fail, and it must fail with the guard's own message, not for an unrelated reason.
+        env:
+          REOWN_PROJECT_ID: ""
+          LATIFI_API_BASE_URL: ""
+          LATIFI_KEYSTORE_PATH: ""
+          LATIFI_KEYSTORE_PASSWORD: ""
+          LATIFI_KEY_ALIAS: ""
+          LATIFI_KEY_PASSWORD: ""
+        run: |
+          set +e
+          output="$(./gradlew --no-daemon -q verifyReleaseConfig 2>&1)"
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            echo "verifyReleaseConfig accepted placeholders and a missing key" >&2
+            exit 1
+          fi
+          if ! printf '%s' "$output" | grep -q "A release build must run in Live mode and be signed"; then
+            echo "verifyReleaseConfig failed, but not with the guard message" >&2
+            printf '%s\n' "$output" >&2
+            exit 1
+          fi
+          echo "release guard: rejected"
+
       - name: Upload lint and test reports
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
