@@ -10,6 +10,12 @@ object ColorTokens {
     /** Coral 500. Decorative fill only in light theme (2.82:1 on white), usable as an icon in dark. */
     const val Coral500: Int = 0xFFFF6B4A.toInt()
 
+    /** Lime 400, the brand pulse. Fill and icon on navy, never body text on white. */
+    const val Lime400: Int = 0xFFC6FF3D.toInt()
+
+    /** Lime 300, the soft brand fill. Navy text on it passes 14:1. */
+    const val Lime300: Int = 0xFFD8FF7A.toInt()
+
     object Light {
         const val background: Int = 0xFFFFFFFF.toInt()
         const val surface: Int = 0xFFF5F7FA.toInt()
@@ -44,6 +50,30 @@ object ColorTokens {
         const val neutralContainer: Int = 0xFFF5F7FA.toInt()
         const val neutralText: Int = 0xFF101828.toInt()
         const val neutralBorder: Int = 0xFF7B8698.toInt()
+
+        /** Hero surface: navy to navy 700 gradient, white text, lime accent. */
+        const val heroStart: Int = 0xFF0B1F3A.toInt()
+        const val heroEnd: Int = 0xFF14407A.toInt()
+        const val onHero: Int = 0xFFFFFFFF.toInt()
+        const val onHeroVariant: Int = 0xFFC9D6EA.toInt()
+        const val heroAccent: Int = Lime400
+
+        /** Quiet chip that sits on the hero. */
+        const val heroChip: Int = 0xFF1F3F6B.toInt()
+
+        /** Soft lime fill (selected tab pill, highlights) and its text. */
+        const val limeContainer: Int = Lime300
+        const val onLimeContainer: Int = 0xFF0B1F3A.toInt()
+
+        /** Faint lime wash for a highlighted card. */
+        const val limeTint: Int = 0xFFF3FFD1.toInt()
+        const val onLimeTint: Int = 0xFF101828.toInt()
+
+        /** Reputation ring and gauge colors per level, 3:1 or better on surface. */
+        const val repNew: Int = 0xFF7B8698.toInt()
+        const val repBuilding: Int = 0xFF14407A.toInt()
+        const val repTrusted: Int = 0xFF0A7D5A.toInt()
+        const val repExcellent: Int = 0xFF0A7D5A.toInt()
     }
 
     object Dark {
@@ -75,5 +105,22 @@ object ColorTokens {
         const val neutralContainer: Int = 0xFF2A3340.toInt()
         const val neutralText: Int = 0xFFF5F7FA.toInt()
         const val neutralBorder: Int = 0xFF7C8799.toInt()
+
+        const val heroStart: Int = 0xFF163C6E.toInt()
+        const val heroEnd: Int = 0xFF0B1F3A.toInt()
+        const val onHero: Int = 0xFFFFFFFF.toInt()
+        const val onHeroVariant: Int = 0xFFC9D6EA.toInt()
+        const val heroAccent: Int = Lime400
+        const val heroChip: Int = 0xFF1F4278.toInt()
+
+        const val limeContainer: Int = 0xFF26330F.toInt()
+        const val onLimeContainer: Int = 0xFFF5F7FA.toInt()
+        const val limeTint: Int = 0xFF26330F.toInt()
+        const val onLimeTint: Int = 0xFFF5F7FA.toInt()
+
+        const val repNew: Int = 0xFF7C8799.toInt()
+        const val repBuilding: Int = 0xFF8FB8FF.toInt()
+        const val repTrusted: Int = 0xFF4FD1A5.toInt()
+        const val repExcellent: Int = Lime400
     }
 }

@@ -18,6 +18,12 @@ object LatiFiShapes {
     /** Bottom sheets, top corners only. */
     val sheet = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
 
+    /** The navy hero surface, a step above a card. */
+    val hero = RoundedCornerShape(24.dp)
+
+    /** Icon chips and small tiles. */
+    val tile = RoundedCornerShape(12.dp)
+
     /** Buttons are fully rounded. */
     val button = CircleShape
 }
