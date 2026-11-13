@@ -1,5 +1,6 @@
 package com.latifi.wallet.ui.feed
 
+import androidx.compose.ui.test.performScrollTo
 import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -366,7 +367,7 @@ class FeedScreenTest {
         rule.onNodeWithText(text(R.string.feed_filtered_empty_body)).assertIsDisplayed()
         rule.onAllNodesWithText(text(R.string.filter_clear)).assertCountEquals(1)
         rule.onNodeWithText(text(R.string.fund_card_cta)).assertDoesNotExist()
-        rule.onNodeWithText(text(R.string.filter_clear)).performClick()
+        rule.onNodeWithText(text(R.string.filter_clear)).performScrollTo().performClick()
         assertEquals(listOf<FeedEvent>(FeedEvent.ClearFilters), events)
     }
 

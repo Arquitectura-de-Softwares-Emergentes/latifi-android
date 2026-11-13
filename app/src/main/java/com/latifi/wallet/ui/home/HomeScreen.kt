@@ -191,10 +191,11 @@ private fun BorrowerSections(state: HomeUiState, onEvent: (HomeEvent) -> Unit, o
         // No reputation yet: no chip. The Reputation tab explains how to start one.
         is Loadable.Success -> reputation.data?.let { rep ->
             HomeCard(modifier = Modifier.staggerIn(1)) {
-                Row(
+                FlowRow(
                     modifier = Modifier.padding(Spacing.lg),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    itemVerticalAlignment = Alignment.CenterVertically,
                 ) {
                     ReputationRing(score = rep.score, level = rep.level, size = 84.dp, stroke = 9.dp)
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {

@@ -207,12 +207,14 @@ private fun ScoreBlock(summary: ReputationSummary) {
     BalanceHero {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             // One phrase for the whole block: "Reputation 620 of 1000, level Trusted".
-            Row(
+            // A flowing row: at large text the ring stays on its line and the words wrap below it.
+            FlowRow(
                 modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = spoken },
                 horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
-                ReputationRing(score = summary.score, level = summary.level, size = 112.dp, stroke = 12.dp, showScore = false, onHero = true)
+                ReputationRing(score = summary.score, level = summary.level, size = 96.dp, stroke = 11.dp, showScore = false, onHero = true)
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     Text(
                         text = stringResource(R.string.rep_score, summary.score),

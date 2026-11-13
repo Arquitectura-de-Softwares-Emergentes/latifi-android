@@ -1,5 +1,6 @@
 package com.latifi.wallet.ui.reputation
 
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -171,7 +172,7 @@ class ReputationScreenTest {
         rule.onAllNodesCount(text(R.string.rep_levels_body), 0)
 
         rule.onNode(header).performClick()
-        rule.onNodeWithText(text(R.string.rep_levels_body)).assertIsDisplayed()
+        rule.onNodeWithText(text(R.string.rep_levels_body)).performScrollTo().assertIsDisplayed()
         rule.onNode(header).assert(collapse).assert(!expand)
 
         rule.onNode(header).performClick()

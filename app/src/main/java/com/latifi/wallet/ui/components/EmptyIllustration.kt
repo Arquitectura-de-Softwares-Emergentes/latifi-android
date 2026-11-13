@@ -29,7 +29,7 @@ enum class Illustration { Pulse, Loans, Coins, Reputation, Filter }
  * accent. It rises in once with a settle spring (instant under reduced motion).
  */
 @Composable
-fun EmptyIllustration(kind: Illustration, modifier: Modifier = Modifier, size: Dp = 128.dp) {
+fun EmptyIllustration(kind: Illustration, modifier: Modifier = Modifier, size: Dp = 104.dp) {
     val motion = rememberMotion()
     val colors = LatiFiTheme.colors
     val enter = remember { Animatable(if (motion.enabled) 0f else 1f) }
