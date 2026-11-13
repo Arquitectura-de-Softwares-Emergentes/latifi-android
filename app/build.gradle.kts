@@ -21,8 +21,35 @@ fun cfg(key: String, env: String, default: String): String {
     return fromFile ?: fromEnv ?: default
 }
 
+// A numeric value that is not a number is a build error, so a typo cannot ship a wrong version.
+fun cfgInt(key: String, env: String, default: Int): Int {
+    val raw = cfg(key, env, default.toString())
+    return raw.trim().toIntOrNull()
+        ?: throw GradleException("$key (or $env) must be a whole number, but the value is not numeric")
+}
+
 val reownProjectId = cfg("reown.projectId", "REOWN_PROJECT_ID", "00000000000000000000000000000000")
 val apiBaseUrl = cfg("api.baseUrl", "LATIFI_API_BASE_URL", "https://latifi-api.invalid/api/v1/")
+
+// The live landing page of plan 06-07 is the default for the three public links, so a release build
+// points at real pages. The environment and local.properties still override each one.
+val landingBase = "https://arquitectura-de-softwares-emergentes.github.io/latifi-landing/"
+val landingUrl = cfg("landing.url", "LATIFI_LANDING_URL", landingBase)
+val termsUrl = cfg("terms.url", "LATIFI_TERMS_URL", landingBase + "terms.html")
+val privacyUrl = cfg("privacy.url", "LATIFI_PRIVACY_URL", landingBase + "privacy.html")
+
+val appVersionCode = cfgInt("version.code", "LATIFI_VERSION_CODE", 1)
+val appVersionName = cfg("version.name", "LATIFI_VERSION_NAME", "0.1.0")
+
+// Release signing material. The key lives outside the repository. None of the four values is ever
+// printed, logged or written into a build file, and the release build type only gets the signing
+// config when all four are present, so debug and CI builds work without a key.
+val signingStoreFile = cfg("signing.storeFile", "LATIFI_KEYSTORE_PATH", "")
+val signingStorePassword = cfg("signing.storePassword", "LATIFI_KEYSTORE_PASSWORD", "")
+val signingKeyAlias = cfg("signing.keyAlias", "LATIFI_KEY_ALIAS", "")
+val signingKeyPassword = cfg("signing.keyPassword", "LATIFI_KEY_PASSWORD", "")
+val hasSigning = listOf(signingStoreFile, signingStorePassword, signingKeyAlias, signingKeyPassword)
+    .all { it.isNotBlank() }
 
 android {
     namespace = "com.latifi.wallet"
@@ -32,8 +59,8 @@ android {
         applicationId = "com.latifi.wallet"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // A WalletConnect project id is not a secret, but a real one is never committed.
@@ -52,20 +79,31 @@ android {
         )
         buildConfigField(
             "String", "LANDING_URL",
-            "\"${cfg("landing.url", "LATIFI_LANDING_URL", "https://latifi.invalid")}\"",
+            "\"$landingUrl\"",
         )
         buildConfigField(
             "String", "TERMS_URL",
-            "\"${cfg("terms.url", "LATIFI_TERMS_URL", "https://latifi.invalid/terms")}\"",
+            "\"$termsUrl\"",
         )
         buildConfigField(
             "String", "PRIVACY_URL",
-            "\"${cfg("privacy.url", "LATIFI_PRIVACY_URL", "https://latifi.invalid/privacy")}\"",
+            "\"$privacyUrl\"",
         )
         buildConfigField(
             "String", "APP_ICON_URL",
             "\"${cfg("icon.url", "LATIFI_ICON_URL", "https://latifi.invalid/icon.png")}\"",
         )
+    }
+
+    signingConfigs {
+        if (hasSigning) {
+            create("release") {
+                storeFile = file(signingStoreFile)
+                storePassword = signingStorePassword
+                keyAlias = signingKeyAlias
+                keyPassword = signingKeyPassword
+            }
+        }
     }
 
     buildTypes {
@@ -77,6 +115,7 @@ android {
         release {
             isMinifyEnabled = false
             buildConfigField("boolean", "LIVE_REQUIRED", "true")
+            if (hasSigning) signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -109,13 +148,21 @@ android {
 }
 
 // A release build with the placeholder project id or the placeholder .invalid API host would
-// silently run in Demo mode with a fake wallet and invented hashes, so it fails here instead.
-// Debug and the CI debug APK are not affected: the task only hangs off the release pre-build.
+// silently run in Demo mode with a fake wallet and invented hashes, and one without a key outside the
+// repository would be unsigned and uninstallable, so it fails here instead. Debug and the CI debug
+// APK are not affected: the task only hangs off the release pre-build. The messages name each input
+// and never repeat a secret value.
 val verifyReleaseConfig by tasks.registering {
     group = "verification"
-    description = "Fails a release build that has no real Reown project id or API base URL."
+    description = "Fails a release build that lacks a real Reown project id, API base URL, signing key or version."
     val projectId = reownProjectId
     val baseUrl = apiBaseUrl
+    val keystorePath = signingStoreFile
+    val storePassword = signingStorePassword
+    val alias = signingKeyAlias
+    val keyPassword = signingKeyPassword
+    val versionName = appVersionName
+    val projectRoot = rootProject.projectDir
     doLast {
         val problems = mutableListOf<String>()
         if (!Regex("^[0-9a-f]{32}$").matches(projectId) || projectId == "00000000000000000000000000000000") {
@@ -125,9 +172,31 @@ val verifyReleaseConfig by tasks.registering {
         if (host.isEmpty() || host.endsWith(".invalid")) {
             problems += "LATIFI_API_BASE_URL (or api.baseUrl in local.properties) is missing or still the .invalid placeholder"
         }
+        if (!baseUrl.startsWith("https://") || !baseUrl.endsWith("/api/v1/")) {
+            problems += "LATIFI_API_BASE_URL must start with https:// and end with /api/v1/"
+        }
+        if (keystorePath.isBlank()) {
+            problems += "LATIFI_KEYSTORE_PATH (or signing.storeFile) is blank"
+        } else {
+            val keystore = File(keystorePath)
+            if (!keystore.isFile) {
+                problems += "the keystore file named by LATIFI_KEYSTORE_PATH does not exist"
+            } else {
+                val root = projectRoot.canonicalFile.toPath()
+                if (keystore.canonicalFile.toPath().startsWith(root)) {
+                    problems += "the keystore lives inside the project directory, keep the release key outside the repository"
+                }
+            }
+        }
+        if (alias.isBlank()) problems += "LATIFI_KEY_ALIAS (or signing.keyAlias) is blank"
+        if (storePassword.isBlank()) problems += "LATIFI_KEYSTORE_PASSWORD (or signing.storePassword) is blank"
+        if (keyPassword.isBlank()) problems += "LATIFI_KEY_PASSWORD (or signing.keyPassword) is blank"
+        if (!Regex("^[0-9]+\\.[0-9]+\\.[0-9]+(-untagged)?$").matches(versionName)) {
+            problems += "LATIFI_VERSION_NAME (or version.name) must look like 1.2.3, with an optional -untagged suffix"
+        }
         if (problems.isNotEmpty()) {
             throw GradleException(
-                "A release build must run in Live mode, but: " + problems.joinToString("; ") +
+                "A release build must run in Live mode and be signed, but: " + problems.joinToString("; ") +
                     ". Set them or build the debug variant.",
             )
         }

@@ -31,9 +31,16 @@ class OkHttpRpcClientTest {
     @After
     fun tearDown() = server.shutdown()
 
-    private fun reply(body: String, code: Int = 200) {
-        server.enqueue(MockResponse().setResponseCode(code).setHeader("Content-Type", "application/json").setBody(body))
+    private fun reply(body: String, code: Int = 200, header: Pair<String, String>? = null) {
+        val response = MockResponse().setResponseCode(code).setHeader("Content-Type", "application/json").setBody(body)
+        if (header != null) response.setHeader(header.first, header.second)
+        server.enqueue(response)
     }
+
+    private fun errorOf(result: Result<*>) = (result.exceptionOrNull() as AppException).error
+
+    private fun rpcError(code: Int, message: String) =
+        reply("""{"jsonrpc":"2.0","id":1,"error":{"code":$code,"message":"$message"}}""")
 
     private fun result(value: String) = reply("""{"jsonrpc":"2.0","id":1,"result":$value}""")
 
@@ -168,14 +175,95 @@ class OkHttpRpcClientTest {
     }
 
     @Test
-    fun rateLimitsAndServerErrorsMapToServer() = runBlocking {
+    fun aRateLimitedAnswerCarriesTheNumericRetryAfter() = runBlocking {
+        reply("{}", code = 429, header = "Retry-After" to "7")
+
+        assertEquals(AppError.RateLimited(7), errorOf(client.getBalance(owner)))
+    }
+
+    @Test
+    fun aRateLimitedAnswerWithoutRetryAfterHasNoWait() = runBlocking {
         reply("{}", code = 429)
+
+        assertEquals(AppError.RateLimited(null), errorOf(client.getBalance(owner)))
+    }
+
+    @Test
+    fun aRetryAfterThatIsAnHttpDateOrOutOfRangeHasNoWait() = runBlocking {
+        reply("{}", code = 429, header = "Retry-After" to "Wed, 21 Oct 2026 07:28:00 GMT")
+        reply("{}", code = 429, header = "Retry-After" to "-3")
+        reply("{}", code = 429, header = "Retry-After" to "999999")
+
+        repeat(3) {
+            assertEquals(AppError.RateLimited(null), errorOf(client.getBalance(owner)))
+        }
+    }
+
+    @Test
+    fun theRateLimitAnswerNeverCarriesTheNodeTextOrTheKey() = runBlocking {
+        reply("{}", code = 429, header = "Retry-After" to "7")
+
+        val failure = client.getBalance(owner).exceptionOrNull() as AppException
+
+        assertNull(failure.cause)
+        assertFalse(failure.toString().contains(secret))
+        assertFalse(failure.stackTraceToString().contains(secret))
+    }
+
+    @Test
+    fun aJsonRpcRateLimitCodeMapsToRateLimitedForTheThreeReads() = runBlocking {
+        rpcError(-32005, "daily request count exceeded")
+        rpcError(-32005, "x")
+        rpcError(-32005, "x")
+
+        assertEquals(AppError.RateLimited(null), errorOf(client.getBalance(owner)))
+        assertEquals(AppError.RateLimited(null), errorOf(client.getReceipt("0x01")))
+        assertEquals(AppError.RateLimited(null), errorOf(client.call(token, "0x1234", owner)))
+    }
+
+    @Test
+    fun aJsonRpcRateLimitMessageMapsToRateLimitedWhateverTheCase() = runBlocking {
+        val messages = listOf("rate limit reached", "Too Many Requests", "Request LIMIT EXCEEDED for this key")
+        for (message in messages) {
+            rpcError(-32000, message)
+            rpcError(-32000, message)
+            rpcError(-32000, message)
+        }
+
+        repeat(messages.size) {
+            assertEquals(AppError.RateLimited(null), errorOf(client.getBalance(owner)))
+            assertEquals(AppError.RateLimited(null), errorOf(client.getReceipt("0x01")))
+            assertEquals(AppError.RateLimited(null), errorOf(client.call(token, "0x1234", owner)))
+        }
+    }
+
+    @Test
+    fun otherHttpFailuresStayServerProblems() = runBlocking {
         reply("oops", code = 500)
+        reply("{}", code = 502)
         reply("{}", code = 403)
 
         repeat(3) {
-            assertEquals(AppError.Server, (client.getBalance(owner).exceptionOrNull() as AppException).error)
+            assertEquals(AppError.Server, errorOf(client.getBalance(owner)))
         }
+    }
+
+    @Test
+    fun anUnrelatedJsonRpcErrorStaysAServerProblem() = runBlocking {
+        rpcError(-32000, "header not found")
+        rpcError(-32000, "header not found")
+        rpcError(-32000, "header not found")
+
+        assertEquals(AppError.Server, errorOf(client.getBalance(owner)))
+        assertEquals(AppError.Server, errorOf(client.getReceipt("0x01")))
+        assertEquals(AppError.Server, errorOf(client.call(token, "0x1234", owner)))
+    }
+
+    @Test
+    fun aRevertIsStillARevertAndNotARateLimit() = runBlocking {
+        reply("""{"jsonrpc":"2.0","id":1,"error":{"code":3,"message":"execution reverted: limit exceeded","data":"0x01"}}""")
+
+        assertEquals(CallOutcome.Reverted("0x01"), client.call(token, "0x1234", owner).getOrThrow())
     }
 
     @Test

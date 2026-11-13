@@ -134,6 +134,22 @@ class RpcChainReadRepositoryTest {
     }
 
     @Test
+    fun aRateLimitedNodeReachesTheCallersUnchanged() = runBlocking {
+        repeat(4) {
+            server.enqueue(MockResponse().setResponseCode(429).setHeader("Retry-After", "5").setBody("{}"))
+        }
+
+        val failures = listOf(
+            repository.tokenBalance(owner),
+            repository.allowance(owner, spender),
+            repository.nextInstallment(BigInteger.valueOf(5)),
+            repository.polBalance(owner),
+        ).map { (it.exceptionOrNull() as AppException).error }
+
+        assertEquals(List(4) { AppError.RateLimited(5) }, failures)
+    }
+
+    @Test
     fun aNodeThatIsDownIsOffline() = runBlocking {
         server.shutdown()
 

@@ -62,7 +62,7 @@ class OkHttpRpcClient(
                     Result.success(CallOutcome.Success(hex))
                 }
                 is Reply.Error ->
-                    if (reply.isRevert) Result.success(CallOutcome.Reverted(reply.data)) else fail(AppError.Server)
+                    if (reply.isRevert) Result.success(CallOutcome.Reverted(reply.data)) else fail(reply.failure())
             }
         }
     }
@@ -70,7 +70,7 @@ class OkHttpRpcClient(
     override suspend fun getReceipt(hash: String): Result<Receipt?> =
         rpc("eth_getTransactionReceipt", JsonArray(listOf(JsonPrimitive(hash)))).mapReply { reply ->
             when (reply) {
-                is Reply.Error -> fail(AppError.Server)
+                is Reply.Error -> fail(reply.failure())
                 is Reply.Value -> {
                     // A null result is the normal answer while the transaction is pending or unknown.
                     val element = reply.result
@@ -86,7 +86,7 @@ class OkHttpRpcClient(
     override suspend fun getBalance(address: String): Result<BigInteger> =
         rpc("eth_getBalance", JsonArray(listOf(JsonPrimitive(address), JsonPrimitive(LATEST)))).mapReply { reply ->
             when (reply) {
-                is Reply.Error -> fail(AppError.Server)
+                is Reply.Error -> fail(reply.failure())
                 is Reply.Value -> {
                     val hex = reply.result.stringOrNull()
                     val value = hex?.let { quantity(it) }
@@ -127,10 +127,13 @@ class OkHttpRpcClient(
             .post(body.toString().toRequestBody(JSON_MEDIA_TYPE))
             .build()
         return try {
-            val (status, text) = client.newCall(request).await().use { it.code to it.body.string() }
+            val answer = client.newCall(request).await().use {
+                Answer(it.code, it.header("Retry-After"), it.body.string())
+            }
             when {
-                status !in HTTP_OK -> fail(AppError.Server)
-                else -> Result.success(parseReply(text))
+                answer.status == HTTP_TOO_MANY_REQUESTS -> fail(AppError.RateLimited(retryAfterSeconds(answer.retryAfter)))
+                answer.status !in HTTP_OK -> fail(AppError.Server)
+                else -> Result.success(parseReply(answer.body))
             }
         } catch (e: CancellationException) {
             throw e
@@ -158,6 +161,13 @@ class OkHttpRpcClient(
         return Reply.Value(root["result"])
     }
 
+    /** Status, the raw `Retry-After` header and the body of one answer. The header text is never kept past parsing. */
+    private class Answer(val status: Int, val retryAfter: String?, val body: String)
+
+    /** Whole seconds from a numeric `Retry-After`. An HTTP date, a negative or an absurd value gives null. */
+    private fun retryAfterSeconds(header: String?): Int? =
+        header?.trim()?.toIntOrNull()?.takeIf { it in 0..MAX_RETRY_AFTER_SECONDS }
+
     private sealed interface Reply {
         data class Value(val result: JsonElement?) : Reply
 
@@ -165,6 +175,16 @@ class OkHttpRpcClient(
             /** Code 3 is the standard answer of a reverted `eth_call`. Some nodes use `-32000` with the same words. */
             val isRevert: Boolean
                 get() = code == REVERT_CODE || message?.startsWith("execution reverted", ignoreCase = true) == true
+
+            /**
+             * A rate limit answer (code -32005, or wording such as "rate limit", "too many requests" or
+             * "limit exceeded") becomes the app's own message. The node text is never copied.
+             */
+            fun failure(): AppError {
+                val text = message.orEmpty()
+                val limited = code == RATE_LIMIT_CODE || RATE_LIMIT_WORDS.any { text.contains(it, ignoreCase = true) }
+                return if (limited) AppError.RateLimited(null) else AppError.Server
+            }
         }
     }
 
@@ -203,6 +223,10 @@ class OkHttpRpcClient(
         const val LATEST = "latest"
         const val REVERT_CODE = 3
         const val HEX_RADIX = 16
+        const val RATE_LIMIT_CODE = -32005
+        const val HTTP_TOO_MANY_REQUESTS = 429
+        const val MAX_RETRY_AFTER_SECONDS = 3600
+        val RATE_LIMIT_WORDS = listOf("rate limit", "too many requests", "limit exceeded")
         val JSON_MEDIA_TYPE = "application/json".toMediaType()
         val HTTP_OK = 200..299
     }
