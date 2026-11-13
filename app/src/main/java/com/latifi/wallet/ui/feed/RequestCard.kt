@@ -1,5 +1,9 @@
 package com.latifi.wallet.ui.feed
 
+import com.latifi.wallet.ui.components.LatiFiCard
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -74,18 +78,14 @@ fun RequestCard(
         .joinToString(", ")
     val openHint = stringResource(R.string.open_details_a11y)
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = LatiFiShapes.card,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, LatiFiTheme.colors.outlineDecor),
-    ) {
+    val source = remember { MutableInteractionSource() }
+    LatiFiCard(modifier = modifier, interactionSource = source) {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .latifiFocusRing(LatiFiShapes.card)
-                    .clickable(role = Role.Button, onClick = onOpen)
+                    .clickable(interactionSource = source, indication = LocalIndication.current, role = Role.Button, onClick = onOpen)
                     // The hint is the state text, so it reads after the sentence without a doubled "double tap".
                     .semantics(mergeDescendants = true) {
                         contentDescription = spoken

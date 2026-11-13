@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.LatiFi" parent="Theme.AppCompat.DayNight.NoActionBar" />
+
+    <!-- Launch theme: navy background and the pulse mark. MainActivity switches to Theme.LatiFi. -->
+    <style name="Theme.LatiFi.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/ic_launcher_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_animated</item>
+        <item name="windowSplashScreenAnimationDuration">700</item>
+        <item name="postSplashScreenTheme">@style/Theme.LatiFi</item>
+    </style>
 </resources>

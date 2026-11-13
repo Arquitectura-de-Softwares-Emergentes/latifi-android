@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -34,20 +35,25 @@ private val CaptionIconSize = 16.dp
  * list passes false and shows one [StaleRateCaption] for the whole screen instead of one per card.
  */
 @Composable
-fun LocalValueLine(value: LocalValue, modifier: Modifier = Modifier, showStale: Boolean = true) {
+fun LocalValueLine(
+    value: LocalValue,
+    modifier: Modifier = Modifier,
+    showStale: Boolean = true,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+) {
     when (value) {
         LocalValue.Loading -> Unit
         LocalValue.Unavailable -> Text(
             text = stringResource(R.string.local_unavailable),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = color,
             modifier = modifier,
         )
         is LocalValue.Value -> Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             Text(
                 text = stringResource(R.string.local_estimate, value.currency.format(value.amount, currentLocale())),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = color,
             )
             if (showStale && value.stale) StaleRateCaption(value.asOf)
         }

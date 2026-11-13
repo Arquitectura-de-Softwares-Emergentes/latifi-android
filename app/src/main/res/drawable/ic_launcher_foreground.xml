@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  The LatiFi isotype pulse and its two dots, the same mark as the web favicon, scaled so the whole
+  mark sits inside the 66dp adaptive icon safe zone of the 108dp canvas.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- A plain letter L inside the adaptive icon safe zone. -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M38,30h10v38h24v10H38z" />
+    <group
+        android:pivotX="50"
+        android:pivotY="53.2"
+        android:scaleX="0.78"
+        android:scaleY="0.78"
+        android:translateX="4"
+        android:translateY="0.8">
+        <path
+            android:pathData="M20.4,53.2H40.8L48.4,31.8L57.9,74.1L64.9,53.2H79.7"
+            android:strokeColor="#C6FF3D"
+            android:strokeWidth="8.5"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:fillColor="#C6FF3D"
+            android:pathData="M10.4,53.2a10,10 0,1 0,20 0a10,10 0,1 0,-20 0z" />
+        <path
+            android:fillColor="#C6FF3D"
+            android:pathData="M69.7,53.2a10,10 0,1 0,20 0a10,10 0,1 0,-20 0z" />
+    </group>
 </vector>

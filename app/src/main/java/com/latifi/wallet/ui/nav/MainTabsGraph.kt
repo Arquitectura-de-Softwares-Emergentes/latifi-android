@@ -18,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.latifi.wallet.domain.model.AppRole
+import com.latifi.wallet.ui.components.rememberMotion
 import com.latifi.wallet.ui.feed.FeedRoute
 import com.latifi.wallet.ui.home.HomeRoute
 import com.latifi.wallet.ui.lender.PortfolioRoute
@@ -60,7 +61,16 @@ internal fun MainTabs(
         selected = selected,
         onSelect = { tab -> tabController.selectTab(tab) },
     ) {
-        NavHost(navController = tabController, startDestination = Routes.HOME) {
+        val motion = rememberMotion()
+        // Fade through between tabs: the old tab fades out, the new one fades and scales in.
+        NavHost(
+            navController = tabController,
+            startDestination = Routes.HOME,
+            enterTransition = { motion.fadeThroughIn() },
+            exitTransition = { motion.fadeThroughOut() },
+            popEnterTransition = { motion.fadeThroughIn() },
+            popExitTransition = { motion.fadeThroughOut() },
+        ) {
             // Each feature plan replaces the placeholder of its tab with the real screen.
             composable(Routes.HOME) {
                 val requestLoan = rememberGatedNavigation(rootController) { Routes.REQUEST_LOAN }

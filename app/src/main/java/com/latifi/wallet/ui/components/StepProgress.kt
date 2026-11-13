@@ -1,5 +1,6 @@
 package com.latifi.wallet.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -41,16 +43,18 @@ fun StepProgress(step: Int, total: Int, modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth().clearAndSetSemantics {},
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
+            val motion = rememberMotion()
             repeat(safeTotal) { index ->
+                val fill by animateColorAsState(
+                    targetValue = if (index < safeStep) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                    animationSpec = motion.medium(),
+                )
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(4.dp)
                         .clip(CircleShape)
-                        .background(
-                            if (index < safeStep) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.outlineVariant,
-                        ),
+                        .background(fill),
                 )
             }
         }

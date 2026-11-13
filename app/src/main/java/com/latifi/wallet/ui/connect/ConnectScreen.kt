@@ -1,5 +1,6 @@
 package com.latifi.wallet.ui.connect
 
+import com.latifi.wallet.ui.components.PulseMark
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -52,6 +53,7 @@ fun ConnectScreen(
                 .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
+            PulseMark(size = 88.dp, animateDraw = true)
             Text(text = stringResource(R.string.connect_body), style = MaterialTheme.typography.bodyLarge)
 
             when (state.phase) {

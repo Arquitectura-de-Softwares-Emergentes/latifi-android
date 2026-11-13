@@ -1,5 +1,13 @@
 package com.latifi.wallet.ui.reputation
 
+import com.latifi.wallet.ui.components.rememberMotion
+import com.latifi.wallet.ui.components.Tone
+import com.latifi.wallet.ui.components.ReputationRing
+import com.latifi.wallet.ui.components.motionItem
+import com.latifi.wallet.ui.components.LatiFiCard
+import com.latifi.wallet.ui.components.BalanceHero
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +60,7 @@ import com.latifi.wallet.ui.common.currentLocale
 import com.latifi.wallet.ui.common.rememberToday
 import com.latifi.wallet.ui.components.ChipOption
 import com.latifi.wallet.ui.components.EmptyPanel
+import com.latifi.wallet.ui.components.Illustration
 import com.latifi.wallet.ui.components.ErrorPanel
 import com.latifi.wallet.ui.components.LiveCounter
 import com.latifi.wallet.ui.components.LoadMoreButton
@@ -132,6 +141,7 @@ fun ReputationScreen(
                 }
                 ScoreContent.NoProfile -> item(key = "no-profile") {
                     EmptyPanel(
+                        illustration = Illustration.Reputation,
                         title = stringResource(R.string.rep_title),
                         body = stringResource(R.string.rep_no_profile),
                         actionLabel = stringResource(R.string.rep_add_details_cta),
@@ -163,6 +173,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.historyItems(
         }
         HistoryContent.Empty -> item(key = "history-empty") {
             EmptyPanel(
+                illustration = Illustration.Reputation,
                 title = stringResource(R.string.rep_history_empty_title),
                 body = stringResource(R.string.rep_history_empty_body),
             )
@@ -176,7 +187,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.historyItems(
             )
         }
         is HistoryContent.Items -> {
-            items(history.events, key = { it.id }) { event -> ReputationEventRow(event) }
+            items(history.events, key = { it.id }) { event -> ReputationEventRow(event, motionItem()) }
             if (history.hasMore) {
                 item(key = "more") {
                     LoadMoreButton(onClick = { onEvent(ReputationEvents.LoadMore) }, loading = state.isLoadingMore)
@@ -193,33 +204,30 @@ private fun ScoreBlock(summary: ReputationSummary) {
     val levelName = stringResource(summary.level.labelRes())
     val spoken = stringResource(R.string.rep_score_a11y, levelName, summary.score)
     val updated = ReputationFormat.updated(summary.updatedAt, locale, today)
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = LatiFiShapes.card,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, LatiFiTheme.colors.outlineDecor),
-    ) {
-        Column(
-            modifier = Modifier.padding(Spacing.lg),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-        ) {
+    BalanceHero {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             // One phrase for the whole block: "Reputation 620 of 1000, level Trusted".
-            Column(
+            // A flowing row: at large text the ring stays on its line and the words wrap below it.
+            FlowRow(
                 modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = spoken },
+                horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = stringResource(R.string.rep_score, summary.score), style = LatiFiType.Amount.Display)
-                ReputationChip(level = summary.level, score = summary.score)
+                ReputationRing(score = summary.score, level = summary.level, size = 96.dp, stroke = 11.dp, showScore = false, onHero = true)
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    Text(
+                        text = stringResource(R.string.rep_score, summary.score),
+                        style = LatiFiType.Amount.Display,
+                        color = LatiFiTheme.colors.onHero,
+                    )
+                    ReputationChip(level = summary.level, score = summary.score)
+                }
             }
-            // The number above is the source of truth. The bar repeats it for sighted people.
-            LinearProgressIndicator(
-                progress = { ReputationFormat.barFraction(summary.score) },
-                modifier = Modifier.fillMaxWidth().clearAndSetSemantics {},
-            )
             Text(
                 text = stringResource(R.string.rep_asof, updated),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = LatiFiTheme.colors.onHeroVariant,
             )
         }
     }
@@ -233,21 +241,16 @@ private fun Counters(summary: ReputationSummary) {
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        CounterTile(stringResource(R.string.rep_counter_ontime), summary.onTimeCount)
-        CounterTile(stringResource(R.string.rep_counter_late), summary.lateCount)
-        CounterTile(stringResource(R.string.rep_counter_defaulted), summary.defaultCount)
+        CounterTile(stringResource(R.string.rep_counter_ontime), summary.onTimeCount, Tone.Success)
+        CounterTile(stringResource(R.string.rep_counter_late), summary.lateCount, Tone.Warning)
+        CounterTile(stringResource(R.string.rep_counter_defaulted), summary.defaultCount, Tone.Danger)
     }
 }
 
 @Composable
-private fun CounterTile(label: String, value: Int) {
+private fun CounterTile(label: String, value: Int, tone: Tone) {
     val spoken = "$label, $value"
-    Surface(
-        modifier = Modifier.widthIn(min = CounterTileMinWidth),
-        shape = LatiFiShapes.card,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, LatiFiTheme.colors.outlineDecor),
-    ) {
+    LatiFiCard(modifier = Modifier.widthIn(min = CounterTileMinWidth), tone = tone) {
         Column(
             modifier = Modifier
                 .padding(Spacing.lg)
@@ -272,14 +275,10 @@ private fun CounterTile(label: String, value: Int) {
 @Composable
 private fun LevelsDisclosure() {
     var expanded by rememberSaveable { mutableStateOf(false) }
+    val motion = rememberMotion()
     val title = stringResource(R.string.rep_levels_title)
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = LatiFiShapes.card,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, LatiFiTheme.colors.outlineDecor),
-    ) {
-        Column {
+    LatiFiCard {
+        Column(modifier = if (motion.enabled) Modifier.animateContentSize() else Modifier) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -308,7 +307,7 @@ private fun LevelsDisclosure() {
                     modifier = Modifier.size(DisclosureIconSize),
                 )
             }
-            if (expanded) {
+            AnimatedVisibility(visible = expanded, enter = motion.enter(), exit = motion.exit()) {
                 Text(
                     text = stringResource(R.string.rep_levels_body),
                     style = MaterialTheme.typography.bodyLarge,

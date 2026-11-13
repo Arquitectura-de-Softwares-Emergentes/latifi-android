@@ -1,5 +1,9 @@
 package com.latifi.wallet.ui.onboarding
 
+import com.latifi.wallet.ui.theme.LatiFiTheme
+import com.latifi.wallet.ui.components.PulseMark
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -152,17 +156,22 @@ private fun OnboardingPage(
         Box(
             modifier = Modifier
                 .size(IllustrationSize)
-                .background(MaterialTheme.colorScheme.secondaryContainer, LatiFiShapes.card)
+                .clip(LatiFiShapes.hero)
+                .background(Brush.linearGradient(LatiFiTheme.colors.heroGradient))
                 .align(Alignment.CenterHorizontally)
                 .clearAndSetSemantics {},
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                painter = painterResource(page.icon),
-                contentDescription = null,
-                modifier = Modifier.size(72.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
+            if (index == 0) {
+                PulseMark(size = 104.dp, animateDraw = true, withBackground = false)
+            } else {
+                Icon(
+                    painter = painterResource(page.icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(72.dp),
+                    tint = LatiFiTheme.colors.heroAccent,
+                )
+            }
         }
         Text(
             text = stringResource(page.title),

@@ -22,7 +22,24 @@ data class LatiFiColors(
     val neutralBorder: Color,
     /** Decorative fill only in light theme. */
     val coral: Color,
+    val heroStart: Color,
+    val heroEnd: Color,
+    val onHero: Color,
+    val onHeroVariant: Color,
+    val heroAccent: Color,
+    val heroChip: Color,
+    val limeContainer: Color,
+    val onLimeContainer: Color,
+    val limeTint: Color,
+    val onLimeTint: Color,
+    val repNew: Color,
+    val repBuilding: Color,
+    val repTrusted: Color,
+    val repExcellent: Color,
 ) {
+    /** The navy hero gradient, diagonal. */
+    val heroGradient: List<Color> get() = listOf(heroStart, heroEnd)
+
     companion object {
         val Light = LatiFiColors(
             link = Color(ColorTokens.Light.link),
@@ -38,6 +55,20 @@ data class LatiFiColors(
             neutralText = Color(ColorTokens.Light.neutralText),
             neutralBorder = Color(ColorTokens.Light.neutralBorder),
             coral = Color(ColorTokens.Coral500),
+            heroStart = Color(ColorTokens.Light.heroStart),
+            heroEnd = Color(ColorTokens.Light.heroEnd),
+            onHero = Color(ColorTokens.Light.onHero),
+            onHeroVariant = Color(ColorTokens.Light.onHeroVariant),
+            heroAccent = Color(ColorTokens.Light.heroAccent),
+            heroChip = Color(ColorTokens.Light.heroChip),
+            limeContainer = Color(ColorTokens.Light.limeContainer),
+            onLimeContainer = Color(ColorTokens.Light.onLimeContainer),
+            limeTint = Color(ColorTokens.Light.limeTint),
+            onLimeTint = Color(ColorTokens.Light.onLimeTint),
+            repNew = Color(ColorTokens.Light.repNew),
+            repBuilding = Color(ColorTokens.Light.repBuilding),
+            repTrusted = Color(ColorTokens.Light.repTrusted),
+            repExcellent = Color(ColorTokens.Light.repExcellent),
         )
 
         val Dark = LatiFiColors(
@@ -54,6 +85,20 @@ data class LatiFiColors(
             neutralText = Color(ColorTokens.Dark.neutralText),
             neutralBorder = Color(ColorTokens.Dark.neutralBorder),
             coral = Color(ColorTokens.Coral500),
+            heroStart = Color(ColorTokens.Dark.heroStart),
+            heroEnd = Color(ColorTokens.Dark.heroEnd),
+            onHero = Color(ColorTokens.Dark.onHero),
+            onHeroVariant = Color(ColorTokens.Dark.onHeroVariant),
+            heroAccent = Color(ColorTokens.Dark.heroAccent),
+            heroChip = Color(ColorTokens.Dark.heroChip),
+            limeContainer = Color(ColorTokens.Dark.limeContainer),
+            onLimeContainer = Color(ColorTokens.Dark.onLimeContainer),
+            limeTint = Color(ColorTokens.Dark.limeTint),
+            onLimeTint = Color(ColorTokens.Dark.onLimeTint),
+            repNew = Color(ColorTokens.Dark.repNew),
+            repBuilding = Color(ColorTokens.Dark.repBuilding),
+            repTrusted = Color(ColorTokens.Dark.repTrusted),
+            repExcellent = Color(ColorTokens.Dark.repExcellent),
         )
     }
 }
