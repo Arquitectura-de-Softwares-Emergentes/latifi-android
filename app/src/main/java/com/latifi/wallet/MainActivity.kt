@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.latifi.wallet.core.AppConfig
 import com.latifi.wallet.core.AppMode
@@ -39,6 +40,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var pickerBridge: AppKitPickerBridge
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // The launch theme draws the navy splash with the pulse mark, then hands over to Theme.LatiFi.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
