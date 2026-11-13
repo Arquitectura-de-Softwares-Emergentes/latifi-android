@@ -1,5 +1,6 @@
 package com.latifi.wallet.ui.nav
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
@@ -20,15 +21,19 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.latifi.wallet.domain.model.AppRole
 import com.latifi.wallet.ui.components.LocalMenuAction
+import com.latifi.wallet.ui.components.rememberMotion
+import com.latifi.wallet.ui.theme.LatiFiTheme
 import kotlinx.coroutines.launch
 
 /** Drawer items are this high, so a 200 percent label still has room. */
@@ -56,6 +61,7 @@ fun AdaptiveNavScaffold(
     val tabs = tabsFor(role)
     val largeText = isLargeTextMode(LocalDensity.current.fontScale)
     val colors = MaterialTheme.colorScheme
+    val brand = LatiFiTheme.colors
 
     val layoutType = if (largeText) {
         NavigationSuiteType.None
@@ -64,16 +70,16 @@ fun AdaptiveNavScaffold(
     }
 
     val barColors = NavigationBarItemDefaults.colors(
-        selectedIconColor = colors.primary,
+        selectedIconColor = brand.onLimeContainer,
         selectedTextColor = colors.primary,
-        indicatorColor = colors.secondaryContainer,
+        indicatorColor = brand.limeContainer,
         unselectedIconColor = colors.onSurfaceVariant,
         unselectedTextColor = colors.onSurfaceVariant,
     )
     val railColors = NavigationRailItemDefaults.colors(
-        selectedIconColor = colors.primary,
+        selectedIconColor = brand.onLimeContainer,
         selectedTextColor = colors.primary,
-        indicatorColor = colors.secondaryContainer,
+        indicatorColor = brand.limeContainer,
         unselectedIconColor = colors.onSurfaceVariant,
         unselectedTextColor = colors.onSurfaceVariant,
     )
@@ -98,7 +104,7 @@ fun AdaptiveNavScaffold(
                     item(
                         selected = tab == selected,
                         onClick = { onSelect(tab) },
-                        icon = { Icon(painter = painterResource(tab.icon), contentDescription = null) },
+                        icon = { TabIcon(tab, tab == selected) },
                         label = { Text(stringResource(tab.label)) },
                         colors = itemColors,
                     )
@@ -136,9 +142,9 @@ fun AdaptiveNavScaffold(
                             .padding(NavigationDrawerItemDefaults.ItemPadding)
                             .heightIn(min = DrawerItemHeight),
                         colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = colors.secondaryContainer,
-                            selectedIconColor = colors.primary,
-                            selectedTextColor = colors.primary,
+                            selectedContainerColor = brand.limeContainer,
+                            selectedIconColor = brand.onLimeContainer,
+                            selectedTextColor = brand.onLimeContainer,
                             unselectedIconColor = colors.onSurfaceVariant,
                             unselectedTextColor = colors.onSurfaceVariant,
                         ),
@@ -149,4 +155,22 @@ fun AdaptiveNavScaffold(
     ) {
         CompositionLocalProvider(LocalMenuAction provides openMenu) { suite() }
     }
+}
+
+/** The tab icon grows a little with a settle spring when its tab is selected. Still under reduced motion. */
+@Composable
+private fun TabIcon(tab: TabDestination, selected: Boolean) {
+    val motion = rememberMotion()
+    val scale by animateFloatAsState(
+        targetValue = if (selected && motion.enabled) 1.14f else 1f,
+        animationSpec = motion.settle(),
+    )
+    Icon(
+        painter = painterResource(tab.icon),
+        contentDescription = null,
+        modifier = Modifier.graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        },
+    )
 }
