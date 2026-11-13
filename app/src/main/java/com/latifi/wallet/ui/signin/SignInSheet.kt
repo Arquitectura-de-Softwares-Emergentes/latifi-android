@@ -15,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -167,7 +168,9 @@ private fun FailureText(text: String) {
 
 /**
  * The bottom sheet around [SignInSheet]. It cannot be dragged away: the sheet ends through
- * Cancel sign-in, or when the sign-in succeeds. Back and a tap outside count as Cancel.
+ * Cancel sign-in, or when the sign-in succeeds. Back and a tap outside count as Cancel. The veto
+ * covers only the Hidden target. Vetoing every target also blocks the first show(), and the sheet
+ * would never open.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -177,7 +180,7 @@ fun SignInSheetHost(
 ) {
     ModalBottomSheet(
         onDismissRequest = { onEvent(SignInEvent.Cancel) },
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true, confirmValueChange = { false }),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true, confirmValueChange = { target -> target != SheetValue.Hidden }),
         shape = LatiFiShapes.sheet,
         containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = null,
