@@ -1,6 +1,7 @@
 package com.latifi.wallet.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -14,10 +15,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -50,12 +53,46 @@ fun PrimaryButton(
     loading: Boolean = false,
     fillMaxWidth: Boolean = true,
 ) {
+    val source = remember { MutableInteractionSource() }
+    val haptics = rememberHaptics()
     ButtonWithReason(enabled, disabledReason, fillMaxWidth, modifier) { buttonModifier ->
         Button(
-            onClick = onClick,
+            onClick = { haptics.confirm(); onClick() },
             enabled = enabled && !loading,
-            modifier = buttonModifier,
+            modifier = buttonModifier.pressScale(source),
             shape = LatiFiShapes.button,
+            interactionSource = source,
+        ) { ButtonLabel(text, loading) }
+    }
+}
+
+/**
+ * A softer alternative to [PrimaryButton] for a second action that still deserves a filled shape,
+ * in the secondary container color. The screen keeps one primary button, so this is for the rest.
+ */
+@Composable
+fun TonalButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    disabledReason: String? = null,
+    loading: Boolean = false,
+    fillMaxWidth: Boolean = true,
+) {
+    val source = remember { MutableInteractionSource() }
+    val haptics = rememberHaptics()
+    ButtonWithReason(enabled, disabledReason, fillMaxWidth, modifier) { buttonModifier ->
+        FilledTonalButton(
+            onClick = { haptics.tick(); onClick() },
+            enabled = enabled && !loading,
+            modifier = buttonModifier.pressScale(source),
+            shape = LatiFiShapes.button,
+            interactionSource = source,
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            ),
         ) { ButtonLabel(text, loading) }
     }
 }
@@ -75,17 +112,22 @@ fun SecondaryButton(
     fillMaxWidth: Boolean = true,
     spokenLabel: String? = null,
 ) {
+    val source = remember { MutableInteractionSource() }
+    val haptics = rememberHaptics()
     ButtonWithReason(enabled, disabledReason, fillMaxWidth, modifier) { buttonModifier ->
         OutlinedButton(
-            onClick = onClick,
+            onClick = { haptics.tick(); onClick() },
             enabled = enabled && !loading,
+            interactionSource = source,
             // A button in a list says which item it acts on ("Fund request of 250.00 tUSD"), so the
             // spoken label replaces the short visible word while the visible word stays in the name.
-            modifier = if (spokenLabel != null) {
-                buttonModifier.semantics { contentDescription = spokenLabel }
-            } else {
-                buttonModifier
-            },
+            modifier = (
+                if (spokenLabel != null) {
+                    buttonModifier.semantics { contentDescription = spokenLabel }
+                } else {
+                    buttonModifier
+                }
+                ).pressScale(source),
             shape = LatiFiShapes.button,
             border = BorderStroke(ControlBorderWidth, MaterialTheme.colorScheme.outline),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
@@ -104,11 +146,14 @@ fun TertiaryButton(
     loading: Boolean = false,
     fillMaxWidth: Boolean = false,
 ) {
+    val source = remember { MutableInteractionSource() }
+    val haptics = rememberHaptics()
     ButtonWithReason(enabled, disabledReason, fillMaxWidth, modifier) { buttonModifier ->
         TextButton(
-            onClick = onClick,
+            onClick = { haptics.tick(); onClick() },
             enabled = enabled && !loading,
-            modifier = buttonModifier,
+            interactionSource = source,
+            modifier = buttonModifier.pressScale(source),
             shape = LatiFiShapes.button,
             colors = ButtonDefaults.textButtonColors(contentColor = LatiFiTheme.colors.link),
         ) { ButtonLabel(text, loading) }

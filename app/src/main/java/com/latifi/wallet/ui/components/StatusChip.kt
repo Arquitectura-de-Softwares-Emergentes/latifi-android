@@ -27,6 +27,14 @@ import com.latifi.wallet.ui.theme.Spacing
 
 private val ChipIconSize = 16.dp
 
+/** The card tone of a loan status: info, warning, success or danger. */
+fun UiLoanStatus.tone(): Tone = when (this) {
+    UiLoanStatus.Open -> Tone.Info
+    UiLoanStatus.Pending -> Tone.Warning
+    UiLoanStatus.Paid -> Tone.Success
+    UiLoanStatus.Overdue -> Tone.Danger
+}
+
 private data class ChipLook(
     val container: Color,
     val content: Color,
