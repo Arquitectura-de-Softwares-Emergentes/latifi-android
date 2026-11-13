@@ -1,5 +1,6 @@
 package com.latifi.wallet.ui.reputation
 
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -162,6 +163,7 @@ class ReputationScreenTest {
     @Test
     fun theLevelsDisclosureExpandsAndCollapsesAndExposesItsState() {
         show(ready())
+        scrollToLevels()
         val title = text(R.string.rep_levels_title)
         val header = hasText(title) and hasClickAction()
         val expand = SemanticsMatcher.keyIsDefined(SemanticsActions.Expand)
@@ -183,6 +185,7 @@ class ReputationScreenTest {
     @Test
     fun theLevelsHeaderIsAtLeastFortyEightDpHigh() {
         show(ready())
+        scrollToLevels()
 
         rule.onNode(hasText(text(R.string.rep_levels_title)) and hasClickAction()).assertHeightIsAtLeast(48.dp)
     }
@@ -332,6 +335,11 @@ class ReputationScreenTest {
         show(ready(), darkTheme = true)
 
         rule.onNodeWithContentDescription(text(R.string.rep_score_a11y, text(R.string.rep_level_trusted), 620)).assertIsDisplayed()
+    }
+
+    /** The Levels card sits below the score hero, so a short screen has to scroll to compose it. */
+    private fun scrollToLevels() {
+        rule.onNode(hasScrollAction()).performScrollToNode(hasText(text(R.string.rep_levels_title)))
     }
 
     private fun androidx.compose.ui.test.junit4.ComposeContentTestRule.onAllNodesCount(text: String, expected: Int) {
