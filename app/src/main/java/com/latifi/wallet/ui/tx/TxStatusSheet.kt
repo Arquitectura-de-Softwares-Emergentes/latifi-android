@@ -60,6 +60,8 @@ import com.latifi.wallet.ui.components.CustomTabLauncher
 import com.latifi.wallet.ui.components.PrimaryButton
 import com.latifi.wallet.ui.components.SecondaryButton
 import com.latifi.wallet.ui.components.StepProgress
+import com.latifi.wallet.ui.components.SuccessBadge
+import com.latifi.wallet.ui.components.rememberHaptics
 import com.latifi.wallet.ui.components.TertiaryButton
 import com.latifi.wallet.ui.theme.LatiFiShapes
 import com.latifi.wallet.ui.theme.LatiFiTheme
@@ -232,6 +234,8 @@ fun TxStatusSheetContent(
 @Composable
 private fun StatusBlock(state: TxState, look: Look) {
     val titleRegion = if (state is TxState.Failed) LiveRegionMode.Assertive else LiveRegionMode.Polite
+    val haptics = rememberHaptics()
+    LaunchedEffect(state is TxState.Failed) { if (state is TxState.Failed) haptics.reject() }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -243,12 +247,17 @@ private fun StatusBlock(state: TxState, look: Look) {
             if (look.progress == Progress.Circular) {
                 CircularProgressIndicator(modifier = Modifier.size(StatusIconSize), strokeWidth = 3.dp)
             }
-            Icon(
-                painter = painterResource(look.icon),
-                contentDescription = null,
-                tint = look.iconTint,
-                modifier = Modifier.size(StatusIconSize),
-            )
+            if (state is TxState.Confirmed) {
+                // The confirmation moment: a disc, a check that draws itself and a small burst.
+                SuccessBadge(size = 40.dp)
+            } else {
+                Icon(
+                    painter = painterResource(look.icon),
+                    contentDescription = null,
+                    tint = look.iconTint,
+                    modifier = Modifier.size(StatusIconSize),
+                )
+            }
             Text(
                 text = stringResource(look.title),
                 style = MaterialTheme.typography.titleLarge,

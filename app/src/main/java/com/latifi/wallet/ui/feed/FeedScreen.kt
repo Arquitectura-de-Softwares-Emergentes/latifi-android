@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import com.latifi.wallet.ui.components.rememberEntranceTracker
+import com.latifi.wallet.ui.components.motionItem
+import com.latifi.wallet.ui.components.staggerIn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,6 +43,7 @@ import com.latifi.wallet.domain.rates.LocalValue
 import com.latifi.wallet.domain.rates.LocalValueProvider
 import com.latifi.wallet.ui.components.AttributionRow
 import com.latifi.wallet.ui.components.EmptyPanel
+import com.latifi.wallet.ui.components.Illustration
 import com.latifi.wallet.ui.components.ErrorPanel
 import com.latifi.wallet.ui.components.LiveCounter
 import com.latifi.wallet.ui.components.LoadMoreButton
@@ -97,6 +102,7 @@ fun FeedScreen(
 ) {
     val snackbar = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
+    val tracker = rememberEntranceTracker()
     val counterFocus = remember { FocusRequester() }
     var filtersExpanded by rememberSaveable { mutableStateOf(false) }
     val failedText = stringResource(R.string.refresh_failed)
@@ -170,12 +176,14 @@ fun FeedScreen(
                     }
                     FeedContent.Empty -> item(key = "empty") {
                         EmptyPanel(
+                            illustration = Illustration.Coins,
                             title = stringResource(R.string.feed_empty_title),
                             body = stringResource(R.string.feed_empty_body),
                         )
                     }
                     FeedContent.FilteredEmpty -> item(key = "filtered-empty") {
                         EmptyPanel(
+                            illustration = Illustration.Filter,
                             title = stringResource(R.string.feed_filtered_empty_title),
                             body = stringResource(R.string.feed_filtered_empty_body),
                             actionLabel = stringResource(R.string.filter_clear),
@@ -184,8 +192,9 @@ fun FeedScreen(
                         )
                     }
                     is FeedContent.Items -> {
-                        items(content.cards, key = { it.loanId.toString() }) { card ->
+                        itemsIndexed(content.cards, key = { _, card -> card.loanId.toString() }) { index, card ->
                             RequestCard(
+                                modifier = motionItem().staggerIn(index, card.loanId, tracker),
                                 model = card,
                                 localValue = LocalValueProvider.valueFrom(state.rates, card.amount, state.currency),
                                 onOpen = { onOpen(card.loanId) },

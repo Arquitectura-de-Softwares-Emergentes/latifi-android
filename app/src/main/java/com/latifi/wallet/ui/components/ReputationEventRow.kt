@@ -61,11 +61,13 @@ fun ReputationEventRow(event: ReputationEvent, modifier: Modifier = Modifier) {
         event.delta < 0 -> MaterialTheme.colorScheme.error
         else -> MaterialTheme.colorScheme.onSurface
     }
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = LatiFiShapes.card,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, LatiFiTheme.colors.outlineDecor),
+    LatiFiCard(
+        modifier = modifier,
+        tone = when {
+            event.delta > 0 -> Tone.Success
+            event.delta < 0 -> Tone.Danger
+            else -> Tone.Neutral
+        },
     ) {
         Column(
             modifier = Modifier

@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import com.latifi.wallet.ui.components.rememberEntranceTracker
+import com.latifi.wallet.ui.components.motionItem
+import com.latifi.wallet.ui.components.staggerIn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +35,7 @@ import com.latifi.wallet.domain.rates.LocalValueProvider
 import com.latifi.wallet.ui.components.AttributionRow
 import com.latifi.wallet.ui.components.ChipOption
 import com.latifi.wallet.ui.components.EmptyPanel
+import com.latifi.wallet.ui.components.Illustration
 import com.latifi.wallet.ui.components.ErrorPanel
 import com.latifi.wallet.ui.components.LiveCounter
 import com.latifi.wallet.ui.components.LoadMoreButton
@@ -64,6 +69,8 @@ fun LoansScreen(
 ) {
     val snackbar = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
+    val tracker = rememberEntranceTracker()
+    
     val failedText = stringResource(R.string.refresh_failed)
     val reloadText = stringResource(R.string.retry_reload)
 
@@ -112,6 +119,7 @@ fun LoansScreen(
                     }
                     LoansContent.Empty -> item(key = "empty") {
                         EmptyPanel(
+                            illustration = Illustration.Loans,
                             title = stringResource(R.string.loans_empty_title),
                             body = stringResource(R.string.loans_empty_body),
                             actionLabel = stringResource(R.string.request_title),
@@ -120,6 +128,7 @@ fun LoansScreen(
                     }
                     LoansContent.FilteredEmpty -> item(key = "filtered-empty") {
                         EmptyPanel(
+                            illustration = Illustration.Filter,
                             title = stringResource(R.string.loans_filtered_empty_title),
                             body = stringResource(R.string.loans_filtered_empty_body),
                             actionLabel = stringResource(R.string.loans_show_all),
@@ -127,8 +136,9 @@ fun LoansScreen(
                         )
                     }
                     is LoansContent.Items -> {
-                        items(content.cards, key = { it.loanId.toString() }) { card ->
+                        itemsIndexed(content.cards, key = { _, card -> card.loanId.toString() }) { index, card ->
                             LoanCard(
+                                modifier = motionItem().staggerIn(index, card.loanId, tracker),
                                 model = card,
                                 localValue = LocalValueProvider.valueFrom(state.rates, card.amount, state.currency),
                                 onClick = { onOpenLoan(card.loanId) },

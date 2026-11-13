@@ -37,6 +37,12 @@ import com.latifi.wallet.ui.common.Loadable
 import com.latifi.wallet.ui.common.currentLocale
 import com.latifi.wallet.ui.common.rememberToday
 import com.latifi.wallet.ui.components.AmountBlock
+import com.latifi.wallet.ui.components.BalanceHero
+import com.latifi.wallet.ui.components.IconChip
+import com.latifi.wallet.ui.components.LatiFiCard
+import com.latifi.wallet.ui.components.ReputationRing
+import com.latifi.wallet.ui.components.Tone
+import com.latifi.wallet.ui.components.staggerIn
 import com.latifi.wallet.ui.components.AttributionRow
 import com.latifi.wallet.ui.components.ErrorPanel
 import com.latifi.wallet.ui.components.LocalValueLine
@@ -88,7 +94,7 @@ fun HomeScreen(
         ) {
             state.greeting?.let { Greeting(it) }
             if (state.lowFee) LowFeeBanner()
-            BalanceSection(state) { onEvent(HomeEvent.Reload(HomeSection.Balance)) }
+            BalanceSection(state, Modifier.staggerIn(0)) { onEvent(HomeEvent.Reload(HomeSection.Balance)) }
             when (state.role) {
                 AppRole.Borrower -> BorrowerSections(state, onEvent, onPay)
                 AppRole.Lender -> LenderSections(state, onEvent)
@@ -96,6 +102,7 @@ fun HomeScreen(
             PrimaryButton(
                 text = stringResource(if (state.role == AppRole.Borrower) R.string.request_title else R.string.home_browse),
                 onClick = if (state.role == AppRole.Borrower) onRequestLoan else onBrowse,
+                modifier = Modifier.staggerIn(3),
             )
             TertiaryButton(
                 text = stringResource(R.string.coins_cta),
@@ -120,56 +127,53 @@ private fun Greeting(name: String) {
 @Composable
 private fun LowFeeBanner() {
     val colors = LatiFiTheme.colors
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colors.warningContainer, LatiFiShapes.card)
-            .padding(Spacing.lg),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        verticalAlignment = Alignment.Top,
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_warning),
-            contentDescription = null,
-            tint = colors.warning,
-            modifier = Modifier.size(BannerIconSize),
-        )
-        Text(
-            text = stringResource(R.string.home_fee_low),
-            style = MaterialTheme.typography.bodyLarge,
-            color = colors.warning,
-        )
+    LatiFiCard(tone = Tone.Warning) {
+        Row(
+            modifier = Modifier.padding(Spacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_warning),
+                contentDescription = null,
+                tint = colors.warning,
+                modifier = Modifier.size(BannerIconSize),
+            )
+            Text(
+                text = stringResource(R.string.home_fee_low),
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.warning,
+            )
+        }
     }
 }
 
 @Composable
-private fun HomeCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = LatiFiShapes.card,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, LatiFiTheme.colors.outlineDecor),
-    ) { content() }
+private fun HomeCard(modifier: Modifier = Modifier, tone: Tone = Tone.Neutral, content: @Composable () -> Unit) {
+    LatiFiCard(modifier = modifier, tone = tone, content = content)
 }
 
 @Composable
-private fun BalanceSection(state: HomeUiState, onReload: () -> Unit) {
+private fun BalanceSection(state: HomeUiState, modifier: Modifier, onReload: () -> Unit) {
     when (val balance = state.balance) {
         Loadable.Loading -> SkeletonCard()
         is Loadable.Error -> ErrorPanel(kind = balance.kind, onReload = onReload)
-        is Loadable.Success -> HomeCard {
-            Column(
-                modifier = Modifier.padding(Spacing.lg),
-                verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-            ) {
+        is Loadable.Success -> BalanceHero(modifier = modifier) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 AmountBlock(
                     label = stringResource(R.string.home_balance),
                     amount = balance.data,
                     local = LocalValueProvider.valueFrom(state.rates, balance.data, state.currency),
+                    onHero = true,
+                    countUp = true,
                 )
                 // A wallet with nothing in it says why and points at the Get test coins action below.
                 if (balance.data.baseUnits.signum() == 0) {
-                    Text(text = stringResource(R.string.home_zero_balance), style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        text = stringResource(R.string.home_zero_balance),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = LatiFiTheme.colors.onHero,
+                    )
                 }
             }
         }
@@ -186,15 +190,17 @@ private fun BorrowerSections(state: HomeUiState, onEvent: (HomeEvent) -> Unit, o
         )
         // No reputation yet: no chip. The Reputation tab explains how to start one.
         is Loadable.Success -> reputation.data?.let { rep ->
-            HomeCard {
-                FlowRow(
+            HomeCard(modifier = Modifier.staggerIn(1)) {
+                Row(
                     modifier = Modifier.padding(Spacing.lg),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-                    itemVerticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(text = stringResource(R.string.rep_title), style = MaterialTheme.typography.titleMedium)
-                    ReputationChip(level = rep.level, score = rep.score)
+                    ReputationRing(score = rep.score, level = rep.level, size = 84.dp, stroke = 9.dp)
+                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                        Text(text = stringResource(R.string.rep_title), style = MaterialTheme.typography.titleMedium)
+                        ReputationChip(level = rep.level, score = rep.score)
+                    }
                 }
             }
         }
@@ -220,19 +226,23 @@ private fun LenderSections(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
         is Loadable.Success -> {
             val label = stringResource(R.string.home_open_requests)
             val spoken = "$label, ${open.data}"
-            HomeCard {
-                Column(
+            HomeCard(modifier = Modifier.staggerIn(1), tone = Tone.Info) {
+                Row(
                     modifier = Modifier
                         .padding(Spacing.lg)
                         .semantics(mergeDescendants = true) { contentDescription = spoken },
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(text = open.data.toString(), style = LatiFiType.Amount.Headline)
+                    IconChip(icon = R.drawable.ic_trending_up, tone = Tone.Info, size = 48.dp)
+                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(text = open.data.toString(), style = LatiFiType.Amount.Headline)
+                    }
                 }
             }
         }
@@ -264,7 +274,7 @@ private fun NextDueSection(
     when (section) {
         Loadable.Loading -> SkeletonCard()
         is Loadable.Error -> ErrorPanel(kind = section.kind, onReload = onReload)
-        is Loadable.Success -> HomeCard {
+        is Loadable.Success -> HomeCard(modifier = Modifier.staggerIn(2), tone = Tone.Accent) {
             Column(
                 modifier = Modifier.padding(Spacing.lg),
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -301,13 +311,17 @@ private fun NextDueSummary(title: String, card: NextDueCard, local: LocalValue) 
         LocalValue.Loading -> null
     }
     val spoken = listOfNotNull(title, amountText, localSpoken, dueLine).joinToString(", ")
-    Column(
+    Row(
         modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = spoken },
-        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+        verticalAlignment = Alignment.Top,
     ) {
-        Text(text = title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(text = amountText, style = LatiFiType.Amount.Headline)
-        LocalValueLine(local)
-        if (dueLine != null) Text(text = dueLine, style = MaterialTheme.typography.bodyMedium)
+        IconChip(icon = R.drawable.ic_schedule, tone = Tone.Success, size = 48.dp)
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = amountText, style = LatiFiType.Amount.Headline)
+            LocalValueLine(local)
+            if (dueLine != null) Text(text = dueLine, style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }

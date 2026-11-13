@@ -1,5 +1,12 @@
 package com.latifi.wallet.ui.loans
 
+import com.latifi.wallet.ui.components.tone
+import com.latifi.wallet.ui.components.toneColors
+import com.latifi.wallet.ui.components.ProgressBar
+import com.latifi.wallet.ui.components.LatiFiCard
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -94,19 +101,20 @@ fun LoanCard(
         .joinToString(", ")
     val fraction = if (model.installments > 0) model.installmentsPaid.toFloat() / model.installments else 0f
 
-    Surface(
+    val source = remember { MutableInteractionSource() }
+    LatiFiCard(
+        tone = model.status.tone(),
+        interactionSource = source,
         modifier = modifier
-            .fillMaxWidth()
             .latifiFocusRing(LatiFiShapes.card)
             .clickable(
+                interactionSource = source,
+                indication = LocalIndication.current,
                 role = Role.Button,
                 onClickLabel = stringResource(R.string.loan_details_title),
                 onClick = onClick,
             )
             .semantics(mergeDescendants = true) { contentDescription = spoken },
-        shape = LatiFiShapes.card,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, LatiFiTheme.colors.outlineDecor),
     ) {
         Column(
             modifier = Modifier.padding(Spacing.lg),
@@ -130,10 +138,7 @@ fun LoanCard(
             }
             Text(text = progressText, style = MaterialTheme.typography.bodyMedium)
             // The text above is the source of truth. The bar repeats it for sighted people.
-            LinearProgressIndicator(
-                progress = { fraction },
-                modifier = Modifier.fillMaxWidth().clearAndSetSemantics {},
-            )
+            ProgressBar(fraction = fraction, color = toneColors(model.status.tone()).content)
             if (nextDueText != null) {
                 Text(
                     text = nextDueText,
