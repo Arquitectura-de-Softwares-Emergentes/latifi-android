@@ -144,6 +144,9 @@ android {
         abortOnError = true
         checkReleaseBuilds = true
         error += listOf("MissingTranslation", "ExtraTranslation")
+        // Reown brings firebase-messaging in. The manifest removes its notification permission and every
+        // component, so the library code that would post notifications never runs.
+        disable += "NotificationPermission"
     }
 }
 
