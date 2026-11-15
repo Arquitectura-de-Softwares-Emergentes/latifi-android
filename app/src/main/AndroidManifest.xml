@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- The app carries no Firebase or Google Play services. Reown pulls firebase-messaging in
+         transitively, so the manifest drops every component and permission that comes with it. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" tools:node="remove" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" tools:node="remove" />
 
     <!-- Lets the wallet picker see installed wallets (Android 11 package visibility). -->
     <queries>
@@ -22,6 +28,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LatiFi"
         android:usesCleartextTraffic="false">
+        <provider
+            android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:authorities="${applicationId}.firebaseinitprovider"
+            tools:node="remove" />
+        <service
+            android:name="com.google.firebase.components.ComponentDiscoveryService"
+            tools:node="remove" />
+        <service
+            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            tools:node="remove" />
+        <receiver
+            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+            tools:node="remove" />
+        <activity
+            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+            tools:node="remove" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            tools:node="remove" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
