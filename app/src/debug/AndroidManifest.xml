@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Debug builds only. Lets a debug build reach the local RPC fault proxy over loopback
+        (adb reverse tcp:8545 tcp:8545). The release manifest keeps cleartext off.
+    -->
+    <application android:networkSecurityConfig="@xml/network_security_config" />
+
+</manifest>

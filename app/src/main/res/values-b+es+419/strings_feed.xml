@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feed_title">Invertir</string>
+    <plurals name="counter_requests">
+        <item quantity="one">%d solicitud</item>
+        <item quantity="other">%d solicitudes</item>
+    </plurals>
+    <string name="loading_requests">Cargando solicitudes</string>
+    <string name="requested_by">Solicitado por %1$s</string>
+    <string name="name_not_shared">Nombre aún no compartido</string>
+    <string name="fund_card_cta">Fondear</string>
+    <string name="fund_card_a11y">Fondear solicitud de %1$s</string>
+    <string name="open_details_a11y">Toca dos veces para abrir el detalle</string>
+    <string name="sort_label">Orden: %1$s</string>
+    <string name="sort_reputation">Reputación</string>
+    <string name="sort_rate">Tasa</string>
+    <string name="sort_term">Plazo</string>
+    <string name="sort_recent">Más recientes</string>
+    <string name="filters_toggle">Filtros</string>
+    <plurals name="filters_active">
+        <item quantity="one">Filtros, %d activo</item>
+        <item quantity="other">Filtros, %d activos</item>
+    </plurals>
+    <string name="group_risk">Riesgo</string>
+    <string name="risk_lowest">Riesgo mínimo</string>
+    <string name="risk_low">Riesgo bajo</string>
+    <string name="risk_medium">Riesgo medio</string>
+    <string name="risk_help">Según el nivel de reputación del prestatario.</string>
+    <string name="group_term">Plazo</string>
+    <plurals name="term_up_to">
+        <item quantity="one">Hasta %d días</item>
+        <item quantity="other">Hasta %d días</item>
+    </plurals>
+    <string name="group_amount">Monto</string>
+    <string name="amount_under">Menos de 100 tUSD</string>
+    <string name="amount_between">De 100 a 500 tUSD</string>
+    <string name="amount_over">Más de 500 tUSD</string>
+    <string name="filter_clear">Limpiar filtros</string>
+    <string name="filter_removed_a11y">Filtro quitado</string>
+    <string name="feed_empty_title">Aún no hay solicitudes abiertas</string>
+    <string name="feed_empty_body">Cuando un prestatario publique una solicitud, aparecerá aquí. Vuelve pronto.</string>
+    <string name="feed_filtered_empty_title">Ninguna solicitud coincide con estos filtros</string>
+    <string name="feed_filtered_empty_body">Prueba quitando un filtro, o límpialos todos para ver todas las solicitudes abiertas.</string>
+    <string name="fund_own_request">Esta es tu propia solicitud.</string>
+</resources>

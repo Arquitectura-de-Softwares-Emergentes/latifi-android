@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="request_step1">Monto y condiciones</string>
+    <string name="request_amount">Monto (tUSD)</string>
+    <string name="request_amount_help">Entre 1 y 10,000 tUSD.</string>
+    <string name="request_rate" formatted="false">Tasa de interés (% anual)</string>
+    <string name="request_rate_help">Los prestamistas ven esta tasa. Una tasa más alta te cuesta más.</string>
+    <string name="request_term">Plazo</string>
+    <string name="request_term_other">Otro</string>
+    <string name="request_term_days">Días</string>
+    <string name="request_installments">Cuotas</string>
+    <string name="request_installments_dec">Reducir cuotas</string>
+    <string name="request_installments_inc">Aumentar cuotas</string>
+    <string name="request_review">Revisar solicitud</string>
+    <string name="request_disabled_reason">Completa el monto, la tasa y el plazo para continuar.</string>
+    <string name="err_amount_range">Escribe un monto entre 1 y 10,000 tUSD.</string>
+    <string name="err_rate_range">Escribe una tasa entre %1$s %% y %2$s %%.</string>
+    <string name="err_term_range">Escribe entre 1 y 365 días.</string>
+    <string name="request_review_title">Revisa tu solicitud</string>
+    <string name="request_each">Cada cuota</string>
+    <string name="request_first_due">La primera cuota vence después de que un prestamista fondee tu solicitud.</string>
+    <string name="request_publish">Publicar solicitud</string>
+    <string name="request_success_title">Tu solicitud está abierta</string>
+    <string name="request_success_body">Los prestamistas ya pueden verla. La encontrarás en Préstamos.</string>
+    <string name="request_view_loans">Ver mis préstamos</string>
+    <string name="leave_title">¿Salir de esta solicitud?</string>
+    <string name="leave_body">Tus cambios no se guardarán.</string>
+    <string name="leave_confirm">Salir de la solicitud</string>
+    <string name="leave_stay">Seguir editando la solicitud</string>
+</resources>

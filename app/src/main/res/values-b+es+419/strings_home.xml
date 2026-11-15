@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_balance">Tu saldo</string>
+    <string name="home_zero_balance">Aún no tienes tUSD. Obtén monedas de prueba para probar LatiFi.</string>
+    <string name="home_next_installment">Próxima cuota</string>
+    <string name="home_no_installment">No tienes cuotas pendientes.</string>
+    <string name="home_open_requests">Solicitudes abiertas</string>
+    <string name="home_next_payment_in">Próximo pago que recibes</string>
+    <string name="home_no_payment_in">Aún no esperas pagos.</string>
+    <string name="home_browse">Ver solicitudes</string>
+    <string name="home_fee_low">A tu billetera le queda poco para la comisión de red. Pide al equipo de LatiFi que la recargue.</string>
+    <string name="coins_cta">Obtener monedas de prueba</string>
+</resources>

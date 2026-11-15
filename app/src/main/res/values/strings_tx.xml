@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tx_pending_title">Pending</string>
+    <string name="tx_pending_body">Open your wallet and approve this action.</string>
+    <string name="tx_open_wallet">Open wallet</string>
+    <string name="tx_cancel">Cancel %1$s</string>
+    <string name="tx_retry">Retry %1$s</string>
+    <string name="tx_action_signin">sign-in</string>
+    <string name="tx_action_request">request</string>
+    <string name="tx_action_payment">payment</string>
+    <string name="tx_action_funding">funding</string>
+    <string name="tx_action_coins">test coins request</string>
+    <string name="tx_keep_waiting_confirm">Keep waiting for confirmation</string>
+    <string name="tx_confirming_title">Confirming</string>
+    <string name="tx_confirming_body">Your action was sent. We are waiting for the network to confirm it.</string>
+    <string name="tx_slow">This is taking longer than usual. Your action may still go through. Do not send it again.</string>
+    <string name="tx_confirmed_title">Confirmed</string>
+    <string name="tx_confirmed_body">The network confirmed this action.</string>
+    <string name="tx_failed_title">Failed</string>
+    <string name="tx_fail_declined">You declined the request in your wallet. Nothing was sent.</string>
+    <string name="tx_fail_session">Your wallet connection ended. Reconnect to continue.</string>
+    <string name="tx_fail_fee">Your wallet does not have enough to pay the network fee. Ask the LatiFi team to top it up, then try again.</string>
+    <string name="tx_fail_tokens">You do not have enough tUSD for this action. Get test coins in Profile.</string>
+    <string name="tx_fail_reverted">The network could not complete this action. Nothing changed except the network fee.</string>
+    <string name="tx_fail_notopen">This request is no longer open. Another lender may have funded it.</string>
+    <string name="tx_fail_network">We could not reach the network. Check your connection and try again.</string>
+    <string name="tx_copy_address">Copy wallet address</string>
+    <string name="receipt_label">Receipt</string>
+    <string name="receipt_copy">Copy receipt</string>
+    <string name="receipt_copied">Receipt copied</string>
+    <string name="receipt_view">View receipt online</string>
+    <string name="back_to_home">Back to home</string>
+    <string name="back_to_requests">Back to requests</string>
+</resources>

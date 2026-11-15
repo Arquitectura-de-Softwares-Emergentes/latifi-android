@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">Inicio</string>
+    <string name="nav_loans">Préstamos</string>
+    <string name="nav_reputation">Reputación</string>
+    <string name="nav_invest">Invertir</string>
+    <string name="nav_portfolio">Portafolio</string>
+    <string name="nav_profile">Perfil</string>
+</resources>

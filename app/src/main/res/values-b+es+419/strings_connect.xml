@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connect_title">Conecta tu billetera</string>
+    <string name="connect_title_return">Reconecta tu billetera</string>
+    <string name="connect_body">Una billetera es una app de tu teléfono que guarda tu dinero digital. LatiFi la abre para que inicies sesión. Nunca vemos el código secreto que la abre.</string>
+    <string name="connect_cta">Conectar billetera</string>
+    <string name="connect_waiting">Esperando a tu billetera</string>
+    <string name="connect_nowallet">No tengo una billetera</string>
+    <string name="connect_help_title">Cómo obtener una billetera</string>
+    <string name="connect_help_body">Instala una app de billetera desde Google Play y crea tu cuenta en ella. Anota la frase de recuperación que te da (una lista de palabras que puede restaurar tu billetera) y mantenla en privado. Nadie en LatiFi te la pedirá jamás. Luego vuelve y toca Conectar billetera.</string>
+    <string name="connect_error_title">No pudimos conectar</string>
+    <string name="connect_error_body">Revisa que la app de tu billetera esté instalada y abierta, y vuelve a intentarlo.</string>
+    <string name="connect_retry">Reintentar conexión</string>
+    <string name="connect_consent">Al conectar aceptas los %1$s y la %2$s.</string>
+    <string name="terms_link">Términos y condiciones</string>
+    <string name="privacy_link">Política de privacidad</string>
+    <string name="signin_title">Confirma que eres tú</string>
+    <string name="signin_body">Tu billetera te pedirá firmar un mensaje corto. Solo prueba que la billetera es tuya. No mueve dinero y no tiene costo.</string>
+    <string name="signin_reauth_body">Tu sesión terminó por seguridad. Confirma de nuevo para continuar donde te quedaste.</string>
+    <string name="signin_cta">Confirmar en la billetera</string>
+    <string name="signin_cancel">Cancelar inicio de sesión</string>
+    <string name="signin_failed">Esa confirmación no funcionó. Inténtalo de nuevo.</string>
+    <string name="signin_ratelimited">Demasiados intentos. Espera %1$d segundos e inténtalo de nuevo.</string>
+    <string name="role_title">¿Qué quieres hacer primero?</string>
+    <string name="role_borrow">Quiero pedir un préstamo</string>
+    <string name="role_borrow_sub">Publica una solicitud y recibe fondos de un prestamista.</string>
+    <string name="role_lend">Quiero invertir</string>
+    <string name="role_lend_sub">Revisa solicitudes y fondea las que te den confianza.</string>
+    <string name="role_cta">Empezar con este rol</string>
+    <string name="role_cta_disabled">Elige un rol para empezar.</string>
+    <string name="role_change_hint">Puedes cambiarlo después en Perfil.</string>
+    <string name="tx_timeout_title">Tu billetera no ha respondido</string>
+    <string name="tx_timeout_body">Abre la app de tu billetera y busca una solicitud pendiente. Si no aparece nada, reconecta tu billetera.</string>
+    <string name="tx_keep_waiting">Seguir esperando a la billetera</string>
+    <string name="tx_reconnect">Reconectar billetera</string>
+    <string name="connect_help_close">Volver a Conectar billetera</string>
+    <string name="signin_declined">Rechazaste la solicitud en tu billetera. No se envió nada.</string>
+    <string name="signin_session_lost">Se cerró la conexión con tu billetera. Reconéctala para continuar.</string>
+</resources>

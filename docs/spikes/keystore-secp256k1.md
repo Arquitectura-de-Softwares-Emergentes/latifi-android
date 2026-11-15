@@ -1,5 +1,7 @@
 # Spike: secp256k1 wallet key and Android Keystore
 
+> **Superseded on custody, 2026-11-09.** The app no longer creates or stores a private key. The Phase 5 context and ROADMAP criterion 1 replace the ADR-0001 custody decision: the user's own wallet app holds the keys and signs through Reown AppKit (see `reown-appkit.md`). The AES-256-GCM envelope pattern below stays. It now wraps only the wallet address and the session token (plan 05-14), never a key. The findings about secp256k1 and the Android Keystore are still valid history. The spike test and its workflow were removed from the repository, and the test source stays readable in git history.
+
 Status: complete. Feeds ADR-0001 (wallet key custody) and ROADMAP Decision 1.
 
 ## Question

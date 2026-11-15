@@ -1,0 +1,51 @@
+{
+  "summary": {
+    "address": "0x1111111111111111111111111111111111111111",
+    "score": 620,
+    "level": "TRUSTED",
+    "onTimeCount": 3,
+    "lateCount": 1,
+    "defaultCount": 0,
+    "profileComplete": true,
+    "updatedAt": "2026-01-01T12:00:00Z"
+  },
+  "history": {
+    "items": [
+      {
+        "id": 42,
+        "loanId": "7",
+        "type": "REPAID_LATE",
+        "delta": -10,
+        "scoreAfter": 620,
+        "daysLate": 4,
+        "txHash": "0x2222222222222222222222222222222222222222222222222222222222222222",
+        "logIndex": 3,
+        "occurredAt": "2026-01-01T12:00:00Z"
+      },
+      {
+        "id": 41,
+        "loanId": "7",
+        "type": "REPAID_ON_TIME",
+        "delta": 20,
+        "scoreAfter": 630,
+        "txHash": "0x3333333333333333333333333333333333333333333333333333333333333333",
+        "logIndex": 0,
+        "occurredAt": "2025-12-20T12:00:00Z"
+      },
+      {
+        "id": 1,
+        "loanId": null,
+        "type": "PROFILE_COMPLETED",
+        "delta": 50,
+        "scoreAfter": 50,
+        "daysLate": null,
+        "txHash": null,
+        "logIndex": null,
+        "occurredAt": "2025-12-01T09:00:00Z"
+      }
+    ],
+    "page": 0,
+    "size": 20,
+    "totalItems": 3
+  }
+}

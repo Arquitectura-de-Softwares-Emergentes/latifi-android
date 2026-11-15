@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="coins_title">Get test coins</string>
+    <string name="coins_body">Get 1,000 tUSD, free test dollars, so you can try LatiFi. They have no real value. Each wallet can get up to 10,000 tUSD in total.</string>
+    <string name="coins_confirm">Get 1,000 tUSD</string>
+    <string name="coins_view_balance">View my balance</string>
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connect_title">Connect your wallet</string>
+    <string name="connect_title_return">Reconnect your wallet</string>
+    <string name="connect_body">A wallet is an app on your phone that holds your digital money. LatiFi opens it so you can sign in. We never see the secret code that unlocks it.</string>
+    <string name="connect_cta">Connect wallet</string>
+    <string name="connect_waiting">Waiting for your wallet</string>
+    <string name="connect_nowallet">I do not have a wallet</string>
+    <string name="connect_help_title">Getting a wallet</string>
+    <string name="connect_help_body">Install a wallet app from Google Play and create your account in it. Write down the recovery phrase it gives you (a list of words that can restore your wallet) and keep it private. Nobody at LatiFi will ever ask for it. Then come back and tap Connect wallet.</string>
+    <string name="connect_error_title">We could not connect</string>
+    <string name="connect_error_body">Check that your wallet app is installed and open, then try again.</string>
+    <string name="connect_retry">Retry connection</string>
+    <string name="connect_consent">By connecting you accept the %1$s and the %2$s.</string>
+    <string name="terms_link">Terms and Conditions</string>
+    <string name="privacy_link">Privacy Policy</string>
+    <string name="signin_title">Confirm it is you</string>
+    <string name="signin_body">Your wallet will ask you to sign a short message. This only proves the wallet is yours. It does not move money and costs nothing.</string>
+    <string name="signin_reauth_body">Your session ended for your safety. Confirm again to continue where you left off.</string>
+    <string name="signin_cta">Confirm in wallet</string>
+    <string name="signin_cancel">Cancel sign-in</string>
+    <string name="signin_failed">That confirmation did not work. Try again.</string>
+    <string name="signin_ratelimited">Too many attempts. Wait %1$d seconds and try again.</string>
+    <string name="role_title">What do you want to do first?</string>
+    <string name="role_borrow">I want to borrow</string>
+    <string name="role_borrow_sub">Post a request and receive funds from a lender.</string>
+    <string name="role_lend">I want to lend</string>
+    <string name="role_lend_sub">Review requests and fund the ones you trust.</string>
+    <string name="role_cta">Start with this role</string>
+    <string name="role_cta_disabled">Choose a role to start.</string>
+    <string name="role_change_hint">You can change this later in Profile.</string>
+    <string name="tx_timeout_title">Your wallet has not answered</string>
+    <string name="tx_timeout_body">Open your wallet app and check for a pending request. If nothing appears, reconnect your wallet.</string>
+    <string name="tx_keep_waiting">Keep waiting for wallet</string>
+    <string name="tx_reconnect">Reconnect wallet</string>
+    <string name="connect_help_close">Back to Connect wallet</string>
+    <string name="signin_declined">You declined the request in your wallet. Nothing was sent.</string>
+    <string name="signin_session_lost">Your wallet connection ended. Reconnect to continue.</string>
+</resources>

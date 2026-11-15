@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="loans_title">Préstamos</string>
+    <string name="group_status">Estado</string>
+    <string name="status_all">Todos</string>
+    <string name="status_open">Abierta</string>
+    <string name="status_pending">Pendiente</string>
+    <string name="status_paid">Pagado</string>
+    <string name="status_overdue">En mora</string>
+    <string name="status_open_a11y">Abierta: espera a un prestamista</string>
+    <string name="status_pending_a11y">Pendiente: fondeado, cuotas en curso</string>
+    <string name="status_paid_a11y">Pagado: devuelto por completo</string>
+    <string name="status_overdue_a11y">En mora: una cuota lleva más de 7 días de atraso</string>
+    <string name="loans_empty_title">Aún no tienes préstamos</string>
+    <string name="loans_empty_body">Solicita tu primer préstamo. Los prestamistas la verán junto con tu reputación.</string>
+    <string name="loans_filtered_empty_title">No hay préstamos con este estado</string>
+    <string name="loans_filtered_empty_body">Elige Todos para ver todos los préstamos.</string>
+    <string name="loans_show_all">Ver todos</string>
+    <string name="loan_progress">%1$d de %2$d cuotas pagadas</string>
+    <string name="loan_next_due">Próxima cuota: %1$s</string>
+    <string name="loan_waiting_lender">Esperando a un prestamista</string>
+    <plurals name="counter_loans">
+        <item quantity="one">%d préstamo</item>
+        <item quantity="other">%d préstamos</item>
+    </plurals>
+    <string name="loading_loans">Cargando préstamos</string>
+    <string name="rate_per_year">%1$s %% anual</string>
+    <plurals name="term_days">
+        <item quantity="one">%d día</item>
+        <item quantity="other">%d días</item>
+    </plurals>
+    <plurals name="installments_count">
+        <item quantity="one">%d cuota</item>
+        <item quantity="other">%d cuotas</item>
+    </plurals>
+    <string name="chip_selected_a11y">%1$s, %2$s, seleccionado</string>
+    <string name="chip_not_selected_a11y">%1$s, %2$s, no seleccionado</string>
+    <string name="request_title">Solicitar préstamo</string>
+</resources>

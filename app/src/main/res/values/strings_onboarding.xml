@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onb1_title">Ask for a loan</string>
+    <string name="onb1_body">Choose how much you need, for how many days and in how many payments. Lenders will see your request and your reputation.</string>
+    <string name="onb1_wallet_note">You do everything in LatiFi through a wallet: a free app on your phone that holds your digital money and asks you to approve each action. You will connect one at the end.</string>
+    <string name="onb2_title">Lend to people you trust</string>
+    <string name="onb2_body">Browse open requests. Each one shows the borrower\'s reputation, the rate and the term, so you decide before you lend.</string>
+    <string name="onb3_title">Pay back in installments</string>
+    <string name="onb3_body">You see the total to repay before you accept. Pay each installment on its date, from your own wallet.</string>
+    <string name="onb4_title">Build your reputation</string>
+    <string name="onb4_body">Each installment paid on time raises your reputation. A higher reputation helps lenders trust your next request.</string>
+    <string name="onb_nocustody">LatiFi never holds your money or the secret code that unlocks your wallet. You approve every action in your own wallet.</string>
+    <string name="onb_finish_help">Back to Profile</string>
+</resources>

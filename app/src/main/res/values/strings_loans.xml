@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="loans_title">Loans</string>
+    <string name="group_status">Status</string>
+    <string name="status_all">All</string>
+    <string name="status_open">Open</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_paid">Paid</string>
+    <string name="status_overdue">Overdue</string>
+    <string name="status_open_a11y">Open: waiting for a lender</string>
+    <string name="status_pending_a11y">Pending: funded, installments in progress</string>
+    <string name="status_paid_a11y">Paid: fully repaid</string>
+    <string name="status_overdue_a11y">Overdue: an installment is more than 7 days late</string>
+    <string name="loans_empty_title">You have no loans yet</string>
+    <string name="loans_empty_body">Request your first loan. Lenders will see it and your reputation.</string>
+    <string name="loans_filtered_empty_title">No loans with this status</string>
+    <string name="loans_filtered_empty_body">Choose All to see every loan.</string>
+    <string name="loans_show_all">Show all</string>
+    <string name="loan_progress">%1$d of %2$d installments paid</string>
+    <string name="loan_next_due">Next installment: %1$s</string>
+    <string name="loan_waiting_lender">Waiting for a lender</string>
+    <plurals name="counter_loans">
+        <item quantity="one">%d loan</item>
+        <item quantity="other">%d loans</item>
+    </plurals>
+    <string name="loading_loans">Loading loans</string>
+    <string name="rate_per_year">%1$s%% a year</string>
+    <plurals name="term_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="installments_count">
+        <item quantity="one">%d installment</item>
+        <item quantity="other">%d installments</item>
+    </plurals>
+    <string name="chip_selected_a11y">%1$s, %2$s, selected</string>
+    <string name="chip_not_selected_a11y">%1$s, %2$s, not selected</string>
+    <string name="request_title">Request a loan</string>
+</resources>
