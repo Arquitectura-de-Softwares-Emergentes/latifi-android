@@ -286,6 +286,7 @@ ok "no password appears in any output, file or gradle argv" "$([ -z "$CANARY_HIT
 APKP="$OUTDIR/latifi-wallet-1.2.3-$CODE.apk"
 GOOD="FIREBASE_APP_ID=1:123456789012:android:0123456789abcdef FIREBASE_GROUP=latifi-demo"
 
+printf 'UNSET\n' >"$R1/scripts/release/firebase-tools.version"
 rd "$APKP" "$GOOD"
 check "distribute refuses the UNSET pin" 2 "$RC"
 ok "UNSET refusal says so" "$(has UNSET)"
